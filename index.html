@@ -34,7 +34,7 @@
         display: flex;
     }
 
-    /* ▼▼▼【レイアウト最終解決】CSS Grid でシンプルかつ堅牢なレイアウトに ▼▼▼ */
+    /* CSS Grid でシンプルかつ堅牢なレイアウトに */
     .container {
         display: grid;
         width: 100%;
@@ -42,11 +42,11 @@
         box-sizing: border-box;
         padding: 10px;
         gap: 10px;
-        grid-template-columns: 1fr; /* 基本は1列（スマホ） */
         grid-template-rows: min-content 1fr; /* ヘッダーの高さは自動、残りがメインエリア */
+        grid-template-columns: 1fr; /* 基本は1列（スマホ） */
     }
-
-    /* 画面幅が650px以上の場合に2列にする */
+    
+    /* 画面幅が650px以上（タブレットやPC）の場合に2列にする */
     @media (min-width: 650px) {
         .container {
             grid-template-columns: 1fr 1fr; /* 横に2列 */
@@ -67,7 +67,6 @@
         position: relative;
     }
     
-    /* ▼▼▼【ご指示通り】h1を廃止し、アイコンヘッダーに ▼▼▼ */
     .header {
         display: flex;
         justify-content: space-between;
@@ -93,7 +92,6 @@
         justify-content: center;
         text-align: center;
     }
-    /* ▼▼▼【ご指示通り】iPhoneでも改行されないフォントサイズに ▼▼▼ */
     #question {
         font-size: 3.8em;
         line-height: 1.1;
@@ -142,7 +140,6 @@
     #start { width: 100%; padding: 12px; font-size: 1.5em; }
     #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
 
-    /* （共通の細かいスタイル） */
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
     #start { background-color: #007bff; color: white; border: none; }
@@ -166,10 +163,7 @@
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <!-- ▼▼▼【ご指示通り】テキストを廃止し、アイコンを表示 ▼▼▼ -->
-            <svg class="header-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M24.6,21.9c0,0,10.5-2.5,19.3-2.5c10.4,0,14,3.3,14,9.6c0,5.8-3,9.4-8.1,12.1c-3.1,1.6-6.6,3.3-6.6,5.8c0,1.9,1.7,3.3,4,3.3c3.8,0,10.6-2.5,15-5.2c1.4-0.8,3,0.3,3,2v15.9c0,1.5-1.5,2.6-2.9,2c-3.4-1.5-10-4.6-16.7-4.6c-11.7,0-17.7,4.8-17.7,11.5c0,6.6,6.1,11,16.8,11s21.7-4.6,21.7-4.6" fill="none" stroke="#333" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <img class="header-icon" src="apple-touch-icon.png" alt="アプリアイコン">
             <span id="remaining-count"></span>
         </div>
         <button id="start">スタート</button>
@@ -202,7 +196,6 @@
     }
     // --- DOM要素の取得 ---
     const startButton = document.getElementById("start");
-    // (中略) 他のDOM要素取得は変更なし
     const questionEl = document.getElementById("question");
     const answerInput = document.getElementById("answer");
     const resultEl = document.getElementById("result");
@@ -218,7 +211,6 @@
     let allQuestions = [];
     let currentQuestionIndex = 0;
     let currentProduct = 0;
-    // (中略) 他の変数は変更なし
     let startTime = 0;
     let isGameActive = false;
     let isProcessing = false;
@@ -226,7 +218,6 @@
 
     // --- ゲームの初期化 ---
     function initializeGame() {
-        // ▼▼▼【アルゴリズム最終FIX】この形で完全にランダムになります ▼▼▼
         let combinations = [];
         for (let i = MIN; i <= MAX; i++) {
             for (let j = i; j <= MAX; j++) {
@@ -280,6 +271,7 @@
         isProcessing = true;
         const value = parseInt(answerInput.value, 10);
         const isCorrect = (value === currentProduct);
+
         if (isCorrect) {
             resultEl.textContent = "正解！";
             resultEl.className = "correct";
