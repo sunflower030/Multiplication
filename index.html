@@ -65,6 +65,12 @@
         position: relative;
     }
     
+    /* ▼▼▼【ご指示通り】スタートボタンと結果表示を重ねるためのエリア ▼▼▼ */
+    .start-area {
+        position: relative;
+        margin-bottom: 10px;
+    }
+
     .header {
         display: flex;
         justify-content: space-between;
@@ -82,9 +88,8 @@
         background-color: #e9e9e9;
     }
 
-    /* ▼▼▼【ご指示通り】レイアウトのFlex比率を大胆に変更 ▼▼▼ */
     #question-area {
-        flex-grow: 0.5; /* このエリアが伸びる比率を小さくする */
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -92,22 +97,24 @@
         text-align: center;
     }
     #question {
-        font-size: clamp(3em, 11vw, 5em);
+        font-size: clamp(3.5em, 12vw, 5.5em);
         line-height: 1.1;
     }
     #question.finish-message {
         font-size: clamp(2em, 7vw, 2.8em);
         color: #007bff;
+        align-self: center;
+        justify-self: center;
     }
     #next-question {
-        font-size: clamp(1.2em, 4vw, 2.2em);
+        font-size: clamp(1.4em, 5vw, 2.4em);
         color: #aaa;
-        margin-top: 0.5em;
+        margin-top: 0; /* くっつける */
         min-height: 1.2em;
     }
 
     #answer {
-        font: 700 clamp(3em, 11vw, 4.5em) 'M PLUS Rounded 1c', sans-serif;
+        font: 700 clamp(3.5em, 12vw, 5em) 'M PLUS Rounded 1c', sans-serif;
         width: 100%;
         height: 1.5em;
         text-align: center;
@@ -115,15 +122,31 @@
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin: 5px 0 0 0;
+        margin: 5px 0;
         caret-color: transparent;
     }
+    
+    /* ▼▼▼【ご指示通り】結果表示をスタートボタンの位置に重ねる ▼▼▼ */
     #result {
-        font-size: clamp(1.2em, 4.5vw, 1.6em);
-        min-height: 1.4em;
-        margin: 5px 0 0 0;
-        padding: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-size: clamp(1.4em, 5vw, 1.8em);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
     }
+    #result.visible {
+        opacity: 1;
+    }
+
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
     #history {
@@ -131,7 +154,7 @@
         padding: 0;
         margin: 10px 0 0 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
-        flex-grow: 1; /* 残りのスペースを履歴エリアが大きく確保 */
+        flex-shrink: 1;
         overflow-y: auto;
         display: none;
     }
@@ -162,34 +185,18 @@
     }
     
     #start { width: 100%; padding: 12px; font-size: clamp(1.4em, 5vw, 1.8em); }
-    /* ▼▼▼【ご指示通り】全画面ボタンは右下に配置 ▼▼▼ */
-    #fullscreen-btn {
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        cursor: pointer;
-    }
+    #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
     
-    .correct { color: #28a745; }
-    .wrong { color: #dc3545; }
+    .correct { color: white; background-color: rgba(40, 167, 69, 0.9); }
+    .wrong { color: white; background-color: rgba(220, 53, 69, 0.9); }
     #start { background-color: #007bff; color: white; border: none; }
-    #start:disabled, .numpad button:disabled { background-color: #ccc; color: #666; cursor: default; }
+    #start:disabled { background-color: #ccc; color: #666; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
     #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
     #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
+    #fullscreen-btn { background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -200,13 +207,17 @@
             <img class="header-icon" src="apple-touch-icon.png" alt="アプリアイコン">
             <span id="remaining-count"></span>
         </div>
-        <button id="start">スタート</button>
+        <!-- ▼▼▼【ご指示通り】スタートボタンと結果表示を重ねるためのエリア ▼▼▼ -->
+        <div class="start-area">
+            <button id="start">スタート</button>
+            <p id="result"></p>
+        </div>
+        <!-- ▼▼▼【ご指示通り】問題の表示位置を変更 ▼▼▼ -->
         <div id="question-area">
             <p id="question"></p>
             <p id="next-question"></p>
         </div>
         <input id="answer" type="text" readonly>
-        <p id="result"></p>
         <ul id="history"></ul>
         <p id="time"></p>
     </div>
@@ -226,7 +237,7 @@
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
+        window.addEventListener('load', () => { navigator.service-worker.register('./sw.js'); });
     }
     
     // DOM要素取得（変更なし）
@@ -269,28 +280,29 @@
                 combinations.push({ numA: i, numB: j });
             }
         }
-        shuffle(combinations); // 確実なシャッフル
+        shuffle(combinations);
         allQuestions = combinations;
 
         currentQuestionIndex = 0;
         retryCount = 0;
         historyEl.innerHTML = "";
         historyEl.classList.remove('visible');
+        resultEl.classList.remove('visible');
         resultEl.textContent = "";
         timeEl.innerHTML = "";
         answerInput.value = "";
         questionEl.classList.remove('finish-message');
         congratsImageWrapper.classList.remove('visible');
+        startButton.style.visibility = 'hidden';
 
         isGameActive = true;
         isProcessing = false;
-        startButton.disabled = true;
         enableInputs();
         startTime = Date.now();
         setQuestion();
     }
 
-    // 問題の表示・更新（変更なし）
+    // 問題の表示・更新
     function setQuestion() {
         if (currentQuestionIndex >= allQuestions.length) {
             finishGame();
@@ -299,17 +311,18 @@
         let { numA, numB } = allQuestions[currentQuestionIndex];
         if (Math.random() < 0.5) { [numA, numB] = [numB, numA]; }
         currentProduct = numA * numB;
-        questionEl.textContent = `${numA} × ${numB} = □`;
+        // ▼▼▼【ご指示通り】「＝□」を削除 ▼▼▼
+        questionEl.textContent = `${numA} × ${numB}`;
+        
         if (currentQuestionIndex + 1 < allQuestions.length) {
             let nextA = allQuestions[currentQuestionIndex + 1].numA;
             let nextB = allQuestions[currentQuestionIndex + 1].numB;
             if (Math.random() < 0.5) { [nextA, nextB] = [nextB, nextA]; }
-            nextQuestionEl.textContent = `${nextA} × ${nextB} = □`;
+            nextQuestionEl.textContent = `${nextA} × ${nextB}`;
         } else {
             nextQuestionEl.textContent = "さいごのもんだい！";
         }
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
-        resultEl.textContent = "";
     }
 
     // 回答の自動送信（変更なし）
@@ -320,34 +333,36 @@
         }
     }
 
-    // 回答処理（変更なし）
+    // 回答処理
     function processAnswer() {
         if (answerInput.value === "") return;
         isProcessing = true;
         const value = parseInt(answerInput.value, 10);
         const isCorrect = (value === currentProduct);
+
         const li = document.createElement("li");
-        li.textContent = `${questionEl.textContent.replace('□', value)}`;
+        // ▼▼▼【ご指示通り】履歴のテキストを修正 ▼▼▼
+        li.textContent = `${questionEl.textContent} = ${value}`;
+
         if (isCorrect) {
             resultEl.textContent = "正解！";
-            resultEl.className = "correct";
+            resultEl.className = "correct visible";
             li.className = "correct";
             currentQuestionIndex++;
-            setTimeout(() => {
-                answerInput.value = "";
-                setQuestion();
-                isProcessing = false;
-            }, 400);
         } else {
-            resultEl.textContent = "ちがうよ、もういちど！";
-            resultEl.className = "wrong";
+            resultEl.textContent = "ちがうよ！";
+            resultEl.className = "wrong visible";
             li.className = "wrong";
             retryCount++;
-            setTimeout(() => {
-                answerInput.value = "";
-                isProcessing = false;
-            }, 400);
         }
+
+        setTimeout(() => {
+            answerInput.value = "";
+            resultEl.classList.remove('visible');
+            if(isCorrect) setQuestion();
+            isProcessing = false;
+        }, 600); // 結果表示を少し長く
+        
         historyEl.prepend(li);
     }
 
@@ -364,43 +379,41 @@
         remainingEl.textContent = "おつかれさま！";
         resultEl.textContent = "";
         historyEl.classList.add('visible');
+        
         if (congratsImage.src && congratsImage.src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
         }
         isGameActive = false;
         disableInputs();
-        startButton.disabled = false;
+        startButton.style.visibility = 'visible';
         startButton.textContent = "もういちどチャレンジ！";
     }
     
-    // ヘルパー関数
     function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
     function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
 
-    // ▼▼▼【ご指示通り】全画面ボタンのスマート化 ▼▼▼
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(() => {});
         } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
+            if (document.exitFullscreen) document.exitFullscreen();
         }
     }
     function updateFullscreenButton() {
         if (document.fullscreenElement) {
-            fullscreenButton.innerHTML = '✕'; // ×印
+            fullscreenButton.innerHTML = '✕';
             fullscreenButton.title = "全画面を解除";
         } else {
-            fullscreenButton.innerHTML = '⛶'; // 四角い記号
+            fullscreenButton.innerHTML = '⛶';
             fullscreenButton.title = "全画面表示";
         }
     }
+    
+    // イベントリスナー
+    startButton.addEventListener("click", initializeGame);
     fullscreenButton.addEventListener("click", toggleFullscreen);
     document.addEventListener('fullscreenchange', updateFullscreenButton);
 
-    // （以降のイベントリスナーは変更なし）
-    startButton.addEventListener("click", initializeGame);
     numpadButtons.forEach(button => {
         button.addEventListener("click", () => {
             if (!isGameActive || isProcessing) return;
