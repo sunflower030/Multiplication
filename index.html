@@ -28,24 +28,15 @@
         user-select: none;
     }
 
-    /* 【変更】左右分割レイアウトの基本を「縦並び（モバイル優先）」に設定 */
+    /* 【変更】レイアウトの基本を「縦並び（モバイル優先）」に */
     .container {
         display: flex;
-        flex-direction: column; /* ← 基本を縦並びに変更 */
+        flex-direction: column; /* iPhone縦画面での基本は縦並び */
         gap: 10px;
     }
-
-    /* 【追加】画面幅が768px以上（タブレットやPC）の場合に左右並びに変更 */
-    @media (min-width: 768px) {
-        .container {
-            flex-direction: row; /* ← 広い画面では横並びに上書き */
-        }
-    }
-
     .left-panel, .right-panel {
         flex: 1;
-        min-width: 300px; /* 最小幅は維持 */
-        padding: 20px;
+        padding: 15px; /* 少しだけ余白を狭く */
         background-color: white;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -58,6 +49,7 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 0;
+        font-size: 1.8em; /* 基本のサイズを少し調整 */
     }
     #remaining-count {
         font-size: 0.5em;
@@ -72,22 +64,20 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 10em;
+        height: 8em; /* 少し高さを詰める */
         text-align: center;
     }
     #question {
-        font-size: 4.2em;
+        font-size: 3.5em; /* 基本サイズ */
         color: #333;
         margin: 0;
         line-height: 1.2;
-        transition: font-size 0.3s, color 0.3s;
     }
     #question.finish-message {
-        font-size: 2.2em;
-        color: #007bff;
+        font-size: 1.8em; /* 終了メッセージも調整 */
     }
     #next-question {
-        font-size: 2.2em;
+        font-size: 1.8em; /* 基本サイズ */
         color: #aaa;
         margin-top: 0.5em;
         min-height: 1.5em;
@@ -95,7 +85,7 @@
     #answer {
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
-        font-size: 4em;
+        font-size: 3.5em; /* 基本サイズ */
         width: 100%;
         height: 1.5em;
         text-align: center;
@@ -106,13 +96,9 @@
         margin-top: 0.5em;
         caret-color: transparent;
     }
-    #answer:focus { outline: none; }
-    #answer::-webkit-outer-spin-button,
-    #answer::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    #answer[type=number] { -moz-appearance: textfield; }
-    #time { font-size: 1.2em; line-height: 1.6; }
+    #time { font-size: 1.1em; line-height: 1.6; }
     #result {
-        font-size: 1.5em;
+        font-size: 1.4em;
         min-height: 1.5em;
         margin-top: 0;
         padding-top: 0.2em;
@@ -124,51 +110,56 @@
     #history { font-size: 1.1em; list-style-type: none; padding-left: 0; margin-top: 1em; max-height: 150px; overflow-y: auto; }
     #history li { padding: 5px; border-bottom: 1px solid #eee; }
     .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .numpad button { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; font-size: 2em; padding: 25px; border-radius: 8px; border: 1px solid #ccc; background-color: #fff; cursor: pointer; transition: background-color 0.2s; }
+    .numpad button {
+        font-family: 'M PLUS Rounded 1c', sans-serif;
+        font-weight: 700;
+        font-size: 1.8em; /* 基本サイズ */
+        padding: 15px; /* 基本サイズ */
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
     .numpad button:hover:not(:disabled) { background-color: #e9e9e9; }
     .numpad button:disabled { background-color: #f8f8f8; color: #ccc; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
+
     #congrats-image-wrapper {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: white;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.5s ease-in-out;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: white; border-radius: 8px; display: flex;
+        align-items: center; justify-content: center; opacity: 0;
+        pointer-events: none; transition: opacity 0.5s ease-in-out;
     }
-    #congrats-image-wrapper.visible {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    #congrats-image-wrapper img {
-        max-width: 90%;
-        max-height: 90%;
-        object-fit: contain;
-    }
+    #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
+    #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
     #fullscreen-btn {
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
-        width: 50px;
-        height: 50px;
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        font-size: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 1000;
+        position: fixed; bottom: 15px; right: 15px; width: 50px; height: 50px;
+        background-color: rgba(0, 0, 0, 0.5); color: white; border: none;
+        border-radius: 50%; font-size: 24px; display: flex; align-items: center;
+        justify-content: center; cursor: pointer; z-index: 1000;
+    }
+
+    /* 【追加】iPhone横画面や小型タブレット向けのスタイル (幅が580px以上) */
+    @media (min-width: 580px) {
+        .container {
+            flex-direction: row; /* 横並びに変更 */
+        }
+    }
+
+    /* 【追加】PCや大型タブレット向けの、より大きなスタイル (幅が992px以上) */
+    @media (min-width: 992px) {
+        .left-panel, .right-panel { padding: 20px; }
+        h1 { font-size: 2.5em; }
+        #question-area { height: 10em; }
+        #question { font-size: 4.2em; }
+        #question.finish-message { font-size: 2.2em; }
+        #next-question { font-size: 2.2em; }
+        #answer { font-size: 4em; }
+        #time { font-size: 1.2em; }
+        #result { font-size: 1.5em; }
+        .numpad button { font-size: 2em; padding: 25px; }
     }
 </style>
 </head>
