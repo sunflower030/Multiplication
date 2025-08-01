@@ -18,27 +18,31 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 
 <style>
-    /* 全体の設定 */
-    html, body {
+    /* ▼▼▼【ご指示通り】全画面警告への最終対策 ▼▼▼ */
+    html {
         height: 100%;
-        margin: 0;
-        padding: 0;
         overflow: hidden;
     }
     body {
+        height: 100%; /* 高さを固定 */
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
         background-color: #f0f0f0;
         user-select: none;
         touch-action: manipulation;
         display: flex;
+        /* キーボード表示時のブラウザの自動スクロールを抑制 */
+        position: fixed;
+        width: 100%;
     }
 
-    /* CSS Grid でレイアウトを定義 */
     .container {
         display: grid;
         width: 100%;
-        height: 100%;
+        height: 100vh; /* ビューポートの高さに固定 */
         box-sizing: border-box;
         padding: 10px;
         gap: 10px;
@@ -134,9 +138,8 @@
         margin-top: 1em;
         align-self: center;
         caret-color: transparent;
-        transition: background-color 0.1s, color 0.1s; /* ▼▼▼ 色の変化をアニメーション ▼▼▼ */
+        transition: background-color 0.1s, color 0.1s;
     }
-    /* ▼▼▼ 正解・不正解で入力欄の色が変わる ▼▼▼ */
     #answer.correct { background-color: #28a745; color: white; }
     #answer.wrong { background-color: #dc3545; color: white; }
     
@@ -189,7 +192,7 @@
     #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
     
     #start { background-color: #007bff; color: white; border: none; }
-    #start:disabled, .numpad button:disabled { background-color: #ccc; color: #666; cursor: default; }
+    #start:disabled { background-color: #ccc; color: #666; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
@@ -288,7 +291,6 @@
         retryCount = 0;
         historyEl.innerHTML = "";
         
-        // UI表示をリセット
         gameArea.style.display = 'flex';
         finishInfo.style.display = 'none';
         remainingEl.style.display = 'flex';
@@ -358,7 +360,7 @@
                 setQuestion();
             }
             isProcessing = false;
-        }, 200); // 0.2秒だけ色を見せる
+        }, 200);
         
         historyEl.prepend(li);
     }
@@ -440,6 +442,13 @@
         } else if (e.key === 'Backspace') {
             answerInput.value = answerInput.value.slice(0, -1);
         }
+    });
+
+    // ▼▼▼【ご指示通り】全画面警告への最終対策「魔法のおまじない」▼▼▼
+    // 入力欄がフォーカスされた時に、ブラウザの自動スクロールをキャンセルする
+    answerInput.addEventListener('focus', () => {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
     });
     
     // 初期状態
