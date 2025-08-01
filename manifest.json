@@ -2,7 +2,7 @@
   "name": "かけ算にチャレンジ！",
   "short_name": "かけ算",
   "start_url": ".",
-  "display": "standalone",
+  "display": "fullscreen",  /* ← ここを変更しました */
   "background_color": "#ffffff",
   "theme_color": "#007bff",
   "description": "九九を楽しく練習するアプリです。",
