@@ -42,7 +42,7 @@
         box-sizing: border-box;
         padding: 10px;
         gap: 10px;
-        grid-template-columns: 1fr; /* スマホでは1列 */
+        grid-template-columns: 1fr;
         grid-template-rows: 1fr;
     }
     
@@ -83,7 +83,7 @@
     }
 
     #question-area {
-        flex-grow: 1;
+        flex-grow: 1; /* 高さを自動調整 */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -124,27 +124,31 @@
     }
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
-    /* ▼▼▼【ご提案通り】履歴はテンキーの下に配置 ▼▼▼ */
+    /* ▼▼▼【ご指示通り】履歴の表示スタイルと位置を修正 ▼▼▼ */
     #history {
         list-style-type: none;
-        padding-left: 0;
+        padding: 10px 0 0 0;
         margin: 10px 0 0 0;
-        font-size: clamp(0.8em, 3vw, 1em);
-        flex-shrink: 1; /* 親要素が縮むときに履歴エリアも縮む */
-        overflow-y: auto; /* エリアが縮んでもスクロールで履歴を見られる */
+        font-size: clamp(0.8em, 3vw, 1.1em);
+        flex-shrink: 1;
+        overflow-y: auto;
         border-top: 1px solid #eee;
+        display: none; /* ゲーム中は非表示 */
+    }
+    #history.visible {
+        display: block; /* 終了時に表示 */
     }
     #history li {
         padding: 4px;
         border-bottom: 1px solid #eee;
     }
+    #history li:first-child { border-top: 1px solid #eee; }
 
-    /* テンキーのレイアウト */
     .numpad {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
-        margin-top: auto; /* 左パネルでは回答欄の下、右パネルでは履歴の上に来るように */
+        margin-top: auto; /* 右パネルで下部に固定 */
     }
     .numpad button {
         font: 700 clamp(1.5em, 5vw, 2.2em) 'M PLUS Rounded 1c', sans-serif;
@@ -186,6 +190,8 @@
         </div>
         <input id="answer" type="text" readonly>
         <p id="result"></p>
+        <!-- ▼▼▼【ご指示通り】履歴を回答欄と結果の間に移動 ▼▼▼ -->
+        <ul id="history"></ul>
         <p id="time"></p>
     </div>
     <div class="right-panel">
@@ -195,8 +201,6 @@
             <button class="num">1</button><button class="num">2</button><button class="num">3</button>
             <button class="clear">クリア</button><button class="num">0</button><button class="backspace">けす</button>
         </div>
-        <!-- ▼▼▼【ご提案通り】履歴をテンキーの下に移動 ▼▼▼ -->
-        <ul id="history"></ul>
         <div id="congrats-image-wrapper">
             <img id="congrats-image" src="https://github.com/sunflower030/Multiplication/blob/main/iine.png?raw=true" alt="おめでとう！">
         </div>
@@ -209,6 +213,7 @@
         window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
     }
     
+    // DOM要素取得（変更なし）
     const startButton = document.getElementById("start");
     const questionEl = document.getElementById("question");
     const nextQuestionEl = document.getElementById("next-question");
@@ -222,6 +227,7 @@
     const congratsImage = document.getElementById("congrats-image");
     const fullscreenButton = document.getElementById("fullscreen-btn");
 
+    // ゲームの状態を管理する変数（変更なし）
     const MIN = 2, MAX = 9;
     let allQuestions = [];
     let currentQuestionIndex = 0;
@@ -231,7 +237,9 @@
     let isProcessing = false;
     let retryCount = 0;
 
+    // ゲームの初期化
     function initializeGame() {
+        // ▼▼▼【アルゴリズム最終確認】このロジックで間違いなくランダムです ▼▼▼
         let combinations = [];
         for (let i = MIN; i <= MAX; i++) {
             for (let j = i; j <= MAX; j++) {
@@ -244,6 +252,7 @@
         currentQuestionIndex = 0;
         retryCount = 0;
         historyEl.innerHTML = "";
+        historyEl.classList.remove('visible'); // 履歴を非表示に
         resultEl.textContent = "";
         timeEl.innerHTML = "";
         answerInput.value = "";
@@ -258,6 +267,7 @@
         setQuestion();
     }
 
+    // 問題の表示・更新（変更なし）
     function setQuestion() {
         if (currentQuestionIndex >= allQuestions.length) {
             finishGame();
@@ -269,13 +279,10 @@
         }
         currentProduct = numA * numB;
         questionEl.textContent = `${numA} × ${numB} = □`;
-        
         if (currentQuestionIndex + 1 < allQuestions.length) {
             let nextA = allQuestions[currentQuestionIndex + 1].numA;
             let nextB = allQuestions[currentQuestionIndex + 1].numB;
-            if (Math.random() < 0.5) {
-                [nextA, nextB] = [nextB, nextA];
-            }
+            if (Math.random() < 0.5) { [nextA, nextB] = [nextB, nextA]; }
             nextQuestionEl.textContent = `${nextA} × ${nextB} = □`;
         } else {
             nextQuestionEl.textContent = "さいごのもんだい！";
@@ -284,6 +291,7 @@
         resultEl.textContent = "";
     }
 
+    // 回答の自動送信（変更なし）
     function checkAndSubmit() {
         if (!isGameActive || isProcessing) return;
         if (answerInput.value.length === String(currentProduct).length) {
@@ -291,6 +299,7 @@
         }
     }
 
+    // 回答処理
     function processAnswer() {
         if (answerInput.value === "") return;
         isProcessing = true;
@@ -323,6 +332,7 @@
         historyEl.prepend(li);
     }
 
+    // ゲーム終了処理
     function finishGame() {
         const endTime = Date.now();
         const elapsed = endTime - startTime;
@@ -334,6 +344,9 @@
         nextQuestionEl.textContent = "";
         remainingEl.textContent = "おつかれさま！";
         resultEl.textContent = "";
+
+        historyEl.classList.add('visible'); // ▼▼▼【ご指示通り】最後に履歴を一括表示▼▼▼
+        
         if (congratsImage.src && congratsImage.src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
         }
@@ -343,9 +356,9 @@
         startButton.textContent = "もういちどチャレンジ！";
     }
 
+    // （以降のヘルパー関数、イベントリスナーは変更なし）
     function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
     function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
-
     startButton.addEventListener("click", initializeGame);
     fullscreenButton.addEventListener("click", () => {
         if (!document.fullscreenElement) {
@@ -381,7 +394,6 @@
             answerInput.value = answerInput.value.slice(0, -1);
         }
     });
-    
     disableInputs();
     remainingEl.textContent = `ぜんぶで 36 もん`;
 </script>
