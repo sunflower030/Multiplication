@@ -4,11 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PWAのための設定 -->
 <meta name="theme-color" content="#007bff"/>
 <link rel="manifest" href="manifest.json">
-
-<!-- ▼▼▼ iPad/iPhone向けの最適化設定を追加 ▼▼▼ -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="favicon-192.png">
@@ -21,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 
 <style>
-    /* （中略）今までのCSSは全く同じなので省略します */
+    /* 全体の設定 */
     body {
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
@@ -30,14 +27,24 @@
         background-color: #f0f0f0;
         user-select: none;
     }
+
+    /* 【変更】左右分割レイアウトの基本を「縦並び（モバイル優先）」に設定 */
     .container {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column; /* ← 基本を縦並びに変更 */
         gap: 10px;
     }
+
+    /* 【追加】画面幅が768px以上（タブレットやPC）の場合に左右並びに変更 */
+    @media (min-width: 768px) {
+        .container {
+            flex-direction: row; /* ← 広い画面では横並びに上書き */
+        }
+    }
+
     .left-panel, .right-panel {
         flex: 1;
-        min-width: 300px;
+        min-width: 300px; /* 最小幅は維持 */
         padding: 20px;
         background-color: white;
         border-radius: 8px;
@@ -146,8 +153,6 @@
         max-height: 90%;
         object-fit: contain;
     }
-
-    /* 【追加】全画面ボタンのスタイル */
     #fullscreen-btn {
         position: fixed;
         bottom: 15px;
