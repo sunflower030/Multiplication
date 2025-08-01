@@ -83,7 +83,7 @@
     }
 
     #question-area {
-        flex-grow: 1; /* 高さを自動調整 */
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -114,41 +114,42 @@
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin: 5px 0;
+        margin: 5px 0 0 0; /* 上の余白だけにする */
         caret-color: transparent;
     }
+    /* ▼▼▼【ご指示通り】結果表示エリアに固定の高さを確保し、UIのガタつきを防止 ▼▼▼ */
     #result {
         font-size: clamp(1.2em, 4.5vw, 1.6em);
-        min-height: 1.4em;
-        margin: 0;
+        min-height: 1.4em; /* この高さが常に確保される */
+        margin: 5px 0 0 0; /* 回答欄との間に余白を設ける */
+        padding: 0;
     }
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
-    /* ▼▼▼【ご指示通り】履歴の表示スタイルと位置を修正 ▼▼▼ */
     #history {
         list-style-type: none;
-        padding: 10px 0 0 0;
+        padding: 0;
         margin: 10px 0 0 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
         flex-shrink: 1;
         overflow-y: auto;
-        border-top: 1px solid #eee;
-        display: none; /* ゲーム中は非表示 */
+        display: none;
     }
     #history.visible {
-        display: block; /* 終了時に表示 */
+        display: block;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
     }
     #history li {
         padding: 4px;
         border-bottom: 1px solid #eee;
     }
-    #history li:first-child { border-top: 1px solid #eee; }
 
     .numpad {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
-        margin-top: auto; /* 右パネルで下部に固定 */
+        margin-top: auto;
     }
     .numpad button {
         font: 700 clamp(1.5em, 5vw, 2.2em) 'M PLUS Rounded 1c', sans-serif;
@@ -190,9 +191,9 @@
         </div>
         <input id="answer" type="text" readonly>
         <p id="result"></p>
-        <!-- ▼▼▼【ご指示通り】履歴を回答欄と結果の間に移動 ▼▼▼ -->
-        <ul id="history"></ul>
         <p id="time"></p>
+        <!-- ▼▼▼【ご指示通り】履歴を右パネルから左パネルに移動 ▼▼▼ -->
+        <ul id="history"></ul>
     </div>
     <div class="right-panel">
         <div class="numpad">
@@ -239,7 +240,6 @@
 
     // ゲームの初期化
     function initializeGame() {
-        // ▼▼▼【アルゴリズム最終確認】このロジックで間違いなくランダムです ▼▼▼
         let combinations = [];
         for (let i = MIN; i <= MAX; i++) {
             for (let j = i; j <= MAX; j++) {
@@ -345,7 +345,7 @@
         remainingEl.textContent = "おつかれさま！";
         resultEl.textContent = "";
 
-        historyEl.classList.add('visible'); // ▼▼▼【ご指示通り】最後に履歴を一括表示▼▼▼
+        historyEl.classList.add('visible');
         
         if (congratsImage.src && congratsImage.src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
