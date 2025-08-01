@@ -82,15 +82,14 @@
         background-color: #e9e9e9;
     }
 
-    /* ▼▼▼【ご指示通り】問題エリアを上に、回答欄を少し上に調整 ▼▼▼ */
+    /* ▼▼▼【ご指示通り】レイアウトのFlex比率を大胆に変更 ▼▼▼ */
     #question-area {
-        flex-grow: 0.8; /* スペース配分を調整 */
+        flex-grow: 0.5; /* このエリアが伸びる比率を小さくする */
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-end; /* 下揃えにして、回答欄との距離を確保 */
+        justify-content: center;
         text-align: center;
-        padding-bottom: 10px; /* 下に余白 */
     }
     #question {
         font-size: clamp(3em, 11vw, 5em);
@@ -99,8 +98,6 @@
     #question.finish-message {
         font-size: clamp(2em, 7vw, 2.8em);
         color: #007bff;
-        align-self: center; /* 終了メッセージは中央に */
-        justify-self: center;
     }
     #next-question {
         font-size: clamp(1.2em, 4vw, 2.2em);
@@ -129,13 +126,12 @@
     }
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
-    /* 履歴エリアのスタイル */
     #history {
         list-style-type: none;
         padding: 0;
         margin: 10px 0 0 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
-        flex-grow: 1; /* 残りのスペースを全て履歴エリアに */
+        flex-grow: 1; /* 残りのスペースを履歴エリアが大きく確保 */
         overflow-y: auto;
         display: none;
     }
@@ -149,7 +145,6 @@
         border-bottom: 1px solid #eee;
     }
 
-    /* テンキー */
     .numpad {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -167,11 +162,11 @@
     }
     
     #start { width: 100%; padding: 12px; font-size: clamp(1.4em, 5vw, 1.8em); }
-    /* ▼▼▼【ご指示通り】全画面ボタンを右上に配置 ▼▼▼ */
+    /* ▼▼▼【ご指示通り】全画面ボタンは右下に配置 ▼▼▼ */
     #fullscreen-btn {
         position: fixed;
-        top: 15px; /* 上に */
-        right: 15px; /* 右に */
+        bottom: 15px;
+        right: 15px;
         width: 45px;
         height: 45px;
         font-size: 20px;
@@ -186,7 +181,6 @@
         cursor: pointer;
     }
     
-    /* （共通スタイルは省略） */
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
     #start { background-color: #007bff; color: white; border: none; }
@@ -213,8 +207,8 @@
         </div>
         <input id="answer" type="text" readonly>
         <p id="result"></p>
-        <p id="time"></p>
         <ul id="history"></ul>
+        <p id="time"></p>
     </div>
     <div class="right-panel">
         <div class="numpad">
@@ -259,7 +253,7 @@
     let isProcessing = false;
     let retryCount = 0;
 
-    // ▼▼▼【アルゴリズム最終FIX】フィッシャー–イェーツ・シャッフルを導入 ▼▼▼
+    // ▼▼▼【アルゴリズム最終FIX】フィッシャー–イェーツ・シャッフル ▼▼▼
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -275,8 +269,7 @@
                 combinations.push({ numA: i, numB: j });
             }
         }
-        // 確実なシャッフルアルゴリズムを実行
-        shuffle(combinations);
+        shuffle(combinations); // 確実なシャッフル
         allQuestions = combinations;
 
         currentQuestionIndex = 0;
@@ -304,9 +297,7 @@
             return;
         }
         let { numA, numB } = allQuestions[currentQuestionIndex];
-        if (Math.random() < 0.5) {
-            [numA, numB] = [numB, numA];
-        }
+        if (Math.random() < 0.5) { [numA, numB] = [numB, numA]; }
         currentProduct = numA * numB;
         questionEl.textContent = `${numA} × ${numB} = □`;
         if (currentQuestionIndex + 1 < allQuestions.length) {
@@ -360,7 +351,7 @@
         historyEl.prepend(li);
     }
 
-    // ゲーム終了処理（変更なし）
+    // ゲーム終了処理
     function finishGame() {
         const endTime = Date.now();
         const elapsed = endTime - startTime;
@@ -381,18 +372,35 @@
         startButton.disabled = false;
         startButton.textContent = "もういちどチャレンジ！";
     }
-
-    // （以降のヘルパー関数、イベントリスナーは変更なし）
+    
+    // ヘルパー関数
     function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
     function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
-    startButton.addEventListener("click", initializeGame);
-    fullscreenButton.addEventListener("click", () => {
+
+    // ▼▼▼【ご指示通り】全画面ボタンのスマート化 ▼▼▼
+    function toggleFullscreen() {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(()=>{});
+            document.documentElement.requestFullscreen().catch(() => {});
         } else {
-            document.exitFullscreen();
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
         }
-    });
+    }
+    function updateFullscreenButton() {
+        if (document.fullscreenElement) {
+            fullscreenButton.innerHTML = '✕'; // ×印
+            fullscreenButton.title = "全画面を解除";
+        } else {
+            fullscreenButton.innerHTML = '⛶'; // 四角い記号
+            fullscreenButton.title = "全画面表示";
+        }
+    }
+    fullscreenButton.addEventListener("click", toggleFullscreen);
+    document.addEventListener('fullscreenchange', updateFullscreenButton);
+
+    // （以降のイベントリスナーは変更なし）
+    startButton.addEventListener("click", initializeGame);
     numpadButtons.forEach(button => {
         button.addEventListener("click", () => {
             if (!isGameActive || isProcessing) return;
@@ -420,6 +428,8 @@
             answerInput.value = answerInput.value.slice(0, -1);
         }
     });
+    
+    // 初期状態
     disableInputs();
     remainingEl.textContent = `ぜんぶで 36 もん`;
 </script>
