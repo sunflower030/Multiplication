@@ -65,22 +65,27 @@
         position: relative;
     }
     
-    /* ▼▼▼【ご指示通り】スタートボタンと結果表示を重ねるためのエリア ▼▼▼ */
-    .start-area {
-        position: relative;
-        margin-bottom: 10px;
-    }
-
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 10px;
     }
+
+    /* ▼▼▼【ご指示通り】アイコンとタイトルをグループ化 ▼▼▼ */
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 8px; /* アイコンとテキストの間隔 */
+    }
     .header-icon {
         width: clamp(30px, 8vw, 40px);
         height: clamp(30px, 8vw, 40px);
     }
+    .app-title {
+        font-size: clamp(1.2em, 4vw, 1.8em);
+    }
+
     #remaining-count {
         font-size: clamp(0.8em, 3vw, 1.1em);
         padding: 4px 12px;
@@ -97,24 +102,23 @@
         text-align: center;
     }
     #question {
-        font-size: clamp(3.5em, 12vw, 5.5em);
+        font-size: clamp(3em, 11vw, 5em);
         line-height: 1.1;
     }
     #question.finish-message {
         font-size: clamp(2em, 7vw, 2.8em);
         color: #007bff;
-        align-self: center;
-        justify-self: center;
+        margin-bottom: 10px;
     }
     #next-question {
-        font-size: clamp(1.4em, 5vw, 2.4em);
+        font-size: clamp(1.2em, 4vw, 2.2em);
         color: #aaa;
-        margin-top: 0; /* くっつける */
+        margin-top: 0.5em;
         min-height: 1.2em;
     }
 
     #answer {
-        font: 700 clamp(3.5em, 12vw, 5em) 'M PLUS Rounded 1c', sans-serif;
+        font: 700 clamp(3em, 11vw, 4.5em) 'M PLUS Rounded 1c', sans-serif;
         width: 100%;
         height: 1.5em;
         text-align: center;
@@ -122,31 +126,15 @@
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin: 5px 0;
+        margin: 5px 0 0 0;
         caret-color: transparent;
     }
-    
-    /* ▼▼▼【ご指示通り】結果表示をスタートボタンの位置に重ねる ▼▼▼ */
     #result {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        font-size: clamp(1.4em, 5vw, 1.8em);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        opacity: 0;
-        transition: opacity 0.2s;
-        pointer-events: none;
+        font-size: clamp(1.2em, 4.5vw, 1.6em);
+        min-height: 1.4em;
+        margin: 5px 0 0 0;
+        padding: 0;
     }
-    #result.visible {
-        opacity: 1;
-    }
-
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
     #history {
@@ -185,10 +173,26 @@
     }
     
     #start { width: 100%; padding: 12px; font-size: clamp(1.4em, 5vw, 1.8em); }
-    #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
+    #fullscreen-btn {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        cursor: pointer;
+    }
     
-    .correct { color: white; background-color: rgba(40, 167, 69, 0.9); }
-    .wrong { color: white; background-color: rgba(220, 53, 69, 0.9); }
+    .correct { color: #28a745; }
+    .wrong { color: #dc3545; }
     #start { background-color: #007bff; color: white; border: none; }
     #start:disabled, .numpad button:disabled { background-color: #ccc; color: #666; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
@@ -196,7 +200,6 @@
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
     #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
     #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
-    #fullscreen-btn { background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -204,22 +207,22 @@
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <img class="header-icon" src="apple-touch-icon.png" alt="アプリアイコン">
+            <!-- ▼▼▼【ご指示通り】アイコンとタイトルを表示 ▼▼▼ -->
+            <div class="header-title">
+                <img class="header-icon" src="apple-touch-icon.png" alt="アプリアイコン">
+                <span class="app-title">九九チャレ🏳‍🌈</span>
+            </div>
             <span id="remaining-count"></span>
         </div>
-        <!-- ▼▼▼【ご指示通り】スタートボタンと結果表示を重ねるためのエリア ▼▼▼ -->
-        <div class="start-area">
-            <button id="start">スタート</button>
-            <p id="result"></p>
-        </div>
-        <!-- ▼▼▼【ご指示通り】問題の表示位置を変更 ▼▼▼ -->
+        <button id="start">スタート</button>
         <div id="question-area">
             <p id="question"></p>
             <p id="next-question"></p>
         </div>
         <input id="answer" type="text" readonly>
-        <ul id="history"></ul>
+        <p id="result"></p>
         <p id="time"></p>
+        <ul id="history"></ul>
     </div>
     <div class="right-panel">
         <div class="numpad">
@@ -237,7 +240,7 @@
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.service-worker.register('./sw.js'); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
     }
     
     // DOM要素取得（変更なし）
@@ -251,7 +254,6 @@
     const remainingEl = document.getElementById("remaining-count");
     const numpadButtons = document.querySelectorAll(".numpad button");
     const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
-    const congratsImage = document.getElementById("congrats-image");
     const fullscreenButton = document.getElementById("fullscreen-btn");
 
     // ゲームの状態を管理する変数（変更なし）
@@ -264,7 +266,7 @@
     let isProcessing = false;
     let retryCount = 0;
 
-    // ▼▼▼【アルゴリズム最終FIX】フィッシャー–イェーツ・シャッフル ▼▼▼
+    // フィッシャー–イェーツ・シャッフル
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -287,13 +289,14 @@
         retryCount = 0;
         historyEl.innerHTML = "";
         historyEl.classList.remove('visible');
-        resultEl.classList.remove('visible');
         resultEl.textContent = "";
         timeEl.innerHTML = "";
-        answerInput.value = "";
         questionEl.classList.remove('finish-message');
         congratsImageWrapper.classList.remove('visible');
-        startButton.style.visibility = 'hidden';
+        
+        answerInput.style.display = '';
+        nextQuestionEl.style.display = '';
+        startButton.disabled = true;
 
         isGameActive = true;
         isProcessing = false;
@@ -302,7 +305,7 @@
         setQuestion();
     }
 
-    // 問題の表示・更新
+    // 問題の表示・更新（変更なし）
     function setQuestion() {
         if (currentQuestionIndex >= allQuestions.length) {
             finishGame();
@@ -311,9 +314,7 @@
         let { numA, numB } = allQuestions[currentQuestionIndex];
         if (Math.random() < 0.5) { [numA, numB] = [numB, numA]; }
         currentProduct = numA * numB;
-        // ▼▼▼【ご指示通り】「＝□」を削除 ▼▼▼
         questionEl.textContent = `${numA} × ${numB}`;
-        
         if (currentQuestionIndex + 1 < allQuestions.length) {
             let nextA = allQuestions[currentQuestionIndex + 1].numA;
             let nextB = allQuestions[currentQuestionIndex + 1].numB;
@@ -323,6 +324,7 @@
             nextQuestionEl.textContent = "さいごのもんだい！";
         }
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
+        resultEl.textContent = "";
     }
 
     // 回答の自動送信（変更なし）
@@ -339,30 +341,24 @@
         isProcessing = true;
         const value = parseInt(answerInput.value, 10);
         const isCorrect = (value === currentProduct);
-
         const li = document.createElement("li");
-        // ▼▼▼【ご指示通り】履歴のテキストを修正 ▼▼▼
         li.textContent = `${questionEl.textContent} = ${value}`;
-
         if (isCorrect) {
             resultEl.textContent = "正解！";
-            resultEl.className = "correct visible";
+            resultEl.className = "correct";
             li.className = "correct";
             currentQuestionIndex++;
         } else {
             resultEl.textContent = "ちがうよ！";
-            resultEl.className = "wrong visible";
+            resultEl.className = "wrong";
             li.className = "wrong";
             retryCount++;
         }
-
         setTimeout(() => {
             answerInput.value = "";
-            resultEl.classList.remove('visible');
             if(isCorrect) setQuestion();
             isProcessing = false;
-        }, 600); // 結果表示を少し長く
-        
+        }, 400);
         historyEl.prepend(li);
     }
 
@@ -375,23 +371,27 @@
         timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
         questionEl.textContent = "よくがんばりました！";
         questionEl.classList.add('finish-message');
-        nextQuestionEl.textContent = "";
-        remainingEl.textContent = "おつかれさま！";
-        resultEl.textContent = "";
-        historyEl.classList.add('visible');
         
-        if (congratsImage.src && congratsImage.src.includes('http')) {
+        nextQuestionEl.style.display = 'none';
+        answerInput.style.display = 'none';
+        resultEl.textContent = "";
+
+        remainingEl.textContent = "おつかれさま！";
+        historyEl.classList.add('visible');
+        if (document.getElementById('congrats-image').src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
         }
         isGameActive = false;
         disableInputs();
-        startButton.style.visibility = 'visible';
+        startButton.disabled = false;
         startButton.textContent = "もういちどチャレンジ！";
     }
     
+    // ヘルパー関数
     function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
     function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
 
+    // 全画面ボタン
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(() => {});
@@ -413,7 +413,6 @@
     startButton.addEventListener("click", initializeGame);
     fullscreenButton.addEventListener("click", toggleFullscreen);
     document.addEventListener('fullscreenchange', updateFullscreenButton);
-
     numpadButtons.forEach(button => {
         button.addEventListener("click", () => {
             if (!isGameActive || isProcessing) return;
