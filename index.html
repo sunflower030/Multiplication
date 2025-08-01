@@ -94,49 +94,39 @@
         margin: 10px 0;
     }
 
-    /* ▼▼▼【ご指示通り】レイアウト構造を再々構築 ▼▼▼ */
+    /* ▼▼▼【ご指示通り】レイアウト構造を最終FIX ▼▼▼ */
     .game-area {
-        flex-grow: 1; /* このエリアが伸びて、回答欄を上に押し上げる */
         display: flex;
         flex-direction: column;
+        align-items: center; /* 全体を中央揃えに */
     }
 
     #question-area {
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         text-align: center;
-        padding-bottom: 10px;
     }
     #question {
         font-size: clamp(3em, 11vw, 5em);
         line-height: 1.1;
-    }
-    #question.finish-message {
-        font-size: clamp(2em, 7vw, 2.8em);
-        color: #007bff;
-        margin-bottom: 10px;
+        margin: 0;
     }
     #next-question {
         font-size: clamp(1.2em, 4vw, 2.2em);
         color: #aaa;
-        margin-top: 0.5em;
         min-height: 1.2em;
+        margin: 0;
     }
 
     #answer {
         font: 700 clamp(3em, 11vw, 4.5em) 'M PLUS Rounded 1c', sans-serif;
         width: 100%;
+        max-width: 400px; /* PCでの横幅を制限 */
         height: 1.5em;
         text-align: center;
         border: 2px solid #ccc;
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin-top: auto; /* 残りのスペースを全て使い、回答欄を一番上に押し上げる */
-        margin-bottom: 10px; /* 下に余白を確保 */
+        margin-top: 5px;
         caret-color: transparent;
     }
     
@@ -161,7 +151,7 @@
     }
 
     .finish-info {
-        display: none; /* ゲーム終了時のみ表示 */
+        display: none;
         flex-direction: column;
         flex-grow: 1;
         overflow: hidden;
@@ -209,7 +199,7 @@
     .correct { color: white; background-color: rgba(40, 167, 69, 0.9); }
     .wrong { color: white; background-color: rgba(220, 53, 69, 0.9); }
     #start { background-color: #007bff; color: white; border: none; }
-    #start:disabled, .numpad button:disabled { background-color: #ccc; color: #666; cursor: default; }
+    #start:disabled { background-color: #ccc; color: #666; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
@@ -242,8 +232,7 @@
             <input id="answer" type="text" readonly>
         </div>
         <div class="finish-info">
-            <p id="time"></p>
-            <ul id="history"></ul>
+            <!-- 終了後にタイムと履歴が表示される -->
         </div>
     </div>
     <div class="right-panel">
@@ -271,8 +260,8 @@
     const nextQuestionEl = document.getElementById("next-question");
     const answerInput = document.getElementById("answer");
     const resultEl = document.getElementById("result");
-    const timeEl = document.getElementById("time");
-    const historyEl = document.getElementById("history");
+    const timeEl = document.createElement('p'); // 終了後に動的に追加
+    const historyEl = document.createElement('ul'); // 終了後に動的に追加
     const remainingEl = document.getElementById("remaining-count");
     const numpadButtons = document.querySelectorAll(".numpad button");
     const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
@@ -318,6 +307,7 @@
         // UI表示をリセット
         gameArea.style.display = 'flex';
         finishInfo.style.display = 'none';
+        finishInfo.innerHTML = ''; // 終了情報エリアをクリア
         
         startButton.style.visibility = 'hidden';
         congratsImageWrapper.classList.remove('visible');
@@ -398,8 +388,10 @@
         finishInfo.style.display = 'flex';
         
         timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
+        finishInfo.appendChild(timeEl);
+        finishInfo.appendChild(historyEl);
+
         remainingEl.textContent = "おつかれさま！";
-        historyEl.classList.add('visible');
         
         if (document.getElementById('congrats-image').src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
@@ -407,7 +399,6 @@
         isGameActive = false;
         disableInputs();
         startButton.style.visibility = 'visible';
-        // ▼▼▼【ご指示通り】ボタンのテキストを変更 ▼▼▼
         startButton.textContent = "もう１チャレ！";
     }
     
