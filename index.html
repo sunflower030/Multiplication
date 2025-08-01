@@ -82,13 +82,15 @@
         background-color: #e9e9e9;
     }
 
+    /* ▼▼▼【ご指示通り】問題エリアを上に、回答欄を少し上に調整 ▼▼▼ */
     #question-area {
-        flex-grow: 1;
+        flex-grow: 0.8; /* スペース配分を調整 */
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end; /* 下揃えにして、回答欄との距離を確保 */
         text-align: center;
+        padding-bottom: 10px; /* 下に余白 */
     }
     #question {
         font-size: clamp(3em, 11vw, 5em);
@@ -97,6 +99,8 @@
     #question.finish-message {
         font-size: clamp(2em, 7vw, 2.8em);
         color: #007bff;
+        align-self: center; /* 終了メッセージは中央に */
+        justify-self: center;
     }
     #next-question {
         font-size: clamp(1.2em, 4vw, 2.2em);
@@ -114,24 +118,24 @@
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin: 5px 0 0 0; /* 上の余白だけにする */
+        margin: 5px 0 0 0;
         caret-color: transparent;
     }
-    /* ▼▼▼【ご指示通り】結果表示エリアに固定の高さを確保し、UIのガタつきを防止 ▼▼▼ */
     #result {
         font-size: clamp(1.2em, 4.5vw, 1.6em);
-        min-height: 1.4em; /* この高さが常に確保される */
-        margin: 5px 0 0 0; /* 回答欄との間に余白を設ける */
+        min-height: 1.4em;
+        margin: 5px 0 0 0;
         padding: 0;
     }
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
+    /* 履歴エリアのスタイル */
     #history {
         list-style-type: none;
         padding: 0;
         margin: 10px 0 0 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
-        flex-shrink: 1;
+        flex-grow: 1; /* 残りのスペースを全て履歴エリアに */
         overflow-y: auto;
         display: none;
     }
@@ -145,6 +149,7 @@
         border-bottom: 1px solid #eee;
     }
 
+    /* テンキー */
     .numpad {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -162,8 +167,26 @@
     }
     
     #start { width: 100%; padding: 12px; font-size: clamp(1.4em, 5vw, 1.8em); }
-    #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
+    /* ▼▼▼【ご指示通り】全画面ボタンを右上に配置 ▼▼▼ */
+    #fullscreen-btn {
+        position: fixed;
+        top: 15px; /* 上に */
+        right: 15px; /* 右に */
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        cursor: pointer;
+    }
     
+    /* （共通スタイルは省略） */
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
     #start { background-color: #007bff; color: white; border: none; }
@@ -173,7 +196,6 @@
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
     #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
     #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
-    #fullscreen-btn { background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; }
 </style>
 </head>
 <body>
@@ -192,7 +214,6 @@
         <input id="answer" type="text" readonly>
         <p id="result"></p>
         <p id="time"></p>
-        <!-- ▼▼▼【ご指示通り】履歴を右パネルから左パネルに移動 ▼▼▼ -->
         <ul id="history"></ul>
     </div>
     <div class="right-panel">
@@ -238,6 +259,14 @@
     let isProcessing = false;
     let retryCount = 0;
 
+    // ▼▼▼【アルゴリズム最終FIX】フィッシャー–イェーツ・シャッフルを導入 ▼▼▼
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
     // ゲームの初期化
     function initializeGame() {
         let combinations = [];
@@ -246,13 +275,14 @@
                 combinations.push({ numA: i, numB: j });
             }
         }
-        combinations.sort(() => Math.random() - 0.5);
+        // 確実なシャッフルアルゴリズムを実行
+        shuffle(combinations);
         allQuestions = combinations;
 
         currentQuestionIndex = 0;
         retryCount = 0;
         historyEl.innerHTML = "";
-        historyEl.classList.remove('visible'); // 履歴を非表示に
+        historyEl.classList.remove('visible');
         resultEl.textContent = "";
         timeEl.innerHTML = "";
         answerInput.value = "";
@@ -299,16 +329,14 @@
         }
     }
 
-    // 回答処理
+    // 回答処理（変更なし）
     function processAnswer() {
         if (answerInput.value === "") return;
         isProcessing = true;
         const value = parseInt(answerInput.value, 10);
         const isCorrect = (value === currentProduct);
-
         const li = document.createElement("li");
         li.textContent = `${questionEl.textContent.replace('□', value)}`;
-
         if (isCorrect) {
             resultEl.textContent = "正解！";
             resultEl.className = "correct";
@@ -332,7 +360,7 @@
         historyEl.prepend(li);
     }
 
-    // ゲーム終了処理
+    // ゲーム終了処理（変更なし）
     function finishGame() {
         const endTime = Date.now();
         const elapsed = endTime - startTime;
@@ -344,9 +372,7 @@
         nextQuestionEl.textContent = "";
         remainingEl.textContent = "おつかれさま！";
         resultEl.textContent = "";
-
         historyEl.classList.add('visible');
-        
         if (congratsImage.src && congratsImage.src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
         }
