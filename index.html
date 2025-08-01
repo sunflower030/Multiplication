@@ -94,22 +94,30 @@
         margin: 10px 0;
     }
 
-    /* ▼▼▼【ご指示通り】レイアウトのFlex比率を最終FIX ▼▼▼ */
+    /* ▼▼▼【ご指示通り】レイアウト構造を再々構築 ▼▼▼ */
+    .game-area {
+        flex-grow: 1; /* このエリアが伸びて、回答欄を上に押し上げる */
+        display: flex;
+        flex-direction: column;
+    }
+
     #question-area {
-        flex-grow: 0.8; /* このエリアが伸びる比率を確保 */
-        flex-shrink: 0; /* 縮まないようにする */
+        flex-shrink: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
+        padding-bottom: 10px;
     }
     #question {
         font-size: clamp(3em, 11vw, 5em);
         line-height: 1.1;
     }
-    #question.finish-message { /* 終了時は空にするので非表示に */
-        display: none;
+    #question.finish-message {
+        font-size: clamp(2em, 7vw, 2.8em);
+        color: #007bff;
+        margin-bottom: 10px;
     }
     #next-question {
         font-size: clamp(1.2em, 4vw, 2.2em);
@@ -127,7 +135,8 @@
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin-top: 10px; /* 問題との間に余白 */
+        margin-top: auto; /* 残りのスペースを全て使い、回答欄を一番上に押し上げる */
+        margin-bottom: 10px; /* 下に余白を確保 */
         caret-color: transparent;
     }
     
@@ -151,30 +160,25 @@
         opacity: 1;
     }
 
-    /* ▼▼▼【ご指示通り】タイム表示と履歴のエリア ▼▼▼ */
     .finish-info {
-        flex-grow: 1; /* 終了時にこのエリアが伸びる */
-        display: flex;
+        display: none; /* ゲーム終了時のみ表示 */
         flex-direction: column;
+        flex-grow: 1;
         overflow: hidden;
     }
     #time {
         font-size: clamp(1em, 3.8vw, 1.2em);
         line-height: 1.5;
-        text-align: center; /* 中央揃え */
-        margin-bottom: 10px; /* 履歴との間に余白 */
+        text-align: center;
+        margin-bottom: 10px;
     }
     #history {
         list-style-type: none;
         padding: 0;
         margin: 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
-        flex-grow: 1; /* 履歴エリアが残りのスペースを全て埋める */
+        flex-grow: 1;
         overflow-y: auto;
-        display: none;
-    }
-    #history.visible {
-        display: block;
         border-top: 1px solid #eee;
         padding-top: 10px;
     }
@@ -205,7 +209,7 @@
     .correct { color: white; background-color: rgba(40, 167, 69, 0.9); }
     .wrong { color: white; background-color: rgba(220, 53, 69, 0.9); }
     #start { background-color: #007bff; color: white; border: none; }
-    #start:disabled { background-color: #ccc; color: #666; cursor: default; }
+    #start:disabled, .numpad button:disabled { background-color: #ccc; color: #666; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
@@ -229,12 +233,14 @@
             <button id="start">スタート</button>
             <p id="result"></p>
         </div>
-        <div id="question-area">
-            <p id="question"></p>
-            <p id="next-question"></p>
+        <!-- ▼▼▼ ゲーム中と終了後で表示を切り替えるエリア ▼▼▼ -->
+        <div class="game-area">
+            <div id="question-area">
+                <p id="question"></p>
+                <p id="next-question"></p>
+            </div>
+            <input id="answer" type="text" readonly>
         </div>
-        <input id="answer" type="text" readonly>
-        <!-- ▼▼▼【ご指示通り】終了後、ここにタイムと履歴が表示される ▼▼▼ -->
         <div class="finish-info">
             <p id="time"></p>
             <ul id="history"></ul>
@@ -259,7 +265,7 @@
         window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
     }
     
-    // DOM要素取得（変更なし）
+    // DOM要素取得
     const startButton = document.getElementById("start");
     const questionEl = document.getElementById("question");
     const nextQuestionEl = document.getElementById("next-question");
@@ -271,11 +277,10 @@
     const numpadButtons = document.querySelectorAll(".numpad button");
     const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
     const fullscreenButton = document.getElementById("fullscreen-btn");
-    const questionArea = document.getElementById("question-area");
+    const gameArea = document.querySelector(".game-area");
     const finishInfo = document.querySelector(".finish-info");
 
-
-    // ゲームの状態を管理する変数（変更なし）
+    // ゲームの状態を管理する変数
     const MIN = 2, MAX = 9;
     let allQuestions = [];
     let currentQuestionIndex = 0;
@@ -307,16 +312,15 @@
         currentQuestionIndex = 0;
         retryCount = 0;
         historyEl.innerHTML = "";
-        historyEl.classList.remove('visible');
         resultEl.classList.remove('visible');
         resultEl.textContent = "";
         
         // UI表示をリセット
-        questionArea.style.display = 'flex';
-        answerInput.style.display = 'block';
+        gameArea.style.display = 'flex';
         finishInfo.style.display = 'none';
         
         startButton.style.visibility = 'hidden';
+        congratsImageWrapper.classList.remove('visible');
 
         isGameActive = true;
         isProcessing = false;
@@ -325,7 +329,7 @@
         setQuestion();
     }
 
-    // 問題の表示・更新（変更なし）
+    // 問題の表示・更新
     function setQuestion() {
         if (currentQuestionIndex >= allQuestions.length) {
             finishGame();
@@ -346,7 +350,7 @@
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
     }
 
-    // 回答の自動送信（変更なし）
+    // 回答の自動送信
     function checkAndSubmit() {
         if (!isGameActive || isProcessing) return;
         if (answerInput.value.length === String(currentProduct).length) {
@@ -390,8 +394,7 @@
         const seconds = Math.floor((elapsed % 60000) / 1000);
         
         // ▼▼▼【ご指示通り】終了画面のUIをFIX ▼▼▼
-        questionArea.style.display = 'none';
-        answerInput.style.display = 'none';
+        gameArea.style.display = 'none';
         finishInfo.style.display = 'flex';
         
         timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
@@ -404,7 +407,8 @@
         isGameActive = false;
         disableInputs();
         startButton.style.visibility = 'visible';
-        startButton.textContent = "もういちどチャレンジ！";
+        // ▼▼▼【ご指示通り】ボタンのテキストを変更 ▼▼▼
+        startButton.textContent = "もう１チャレ！";
     }
     
     // ヘルパー関数
