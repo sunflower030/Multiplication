@@ -14,7 +14,7 @@
 <link rel="icon" href="favicon.ico">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 
 <style>
@@ -69,14 +69,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
     }
-
-    /* ▼▼▼【ご指示通り】アイコンとタイトルをグループ化 ▼▼▼ */
     .header-title {
         display: flex;
         align-items: center;
-        gap: 8px; /* アイコンとテキストの間隔 */
+        gap: 8px;
     }
     .header-icon {
         width: clamp(30px, 8vw, 40px);
@@ -85,7 +82,6 @@
     .app-title {
         font-size: clamp(1.2em, 4vw, 1.8em);
     }
-
     #remaining-count {
         font-size: clamp(0.8em, 3vw, 1.1em);
         padding: 4px 12px;
@@ -93,8 +89,14 @@
         background-color: #e9e9e9;
     }
 
+    /* ▼▼▼【ご指示通り】スタートボタンと結果表示を重ねるためのエリア ▼▼▼ */
+    .start-result-area {
+        position: relative;
+        margin: 10px 0;
+    }
+
     #question-area {
-        flex-grow: 1;
+        flex-grow: 0.8; /* スペース配分を調整し、回答欄を上に */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -126,15 +128,31 @@
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin: 5px 0 0 0;
+        margin-top: 5px;
         caret-color: transparent;
     }
+    
+    /* ▼▼▼【ご指示通り】結果表示をスタートボタンの位置に重ねる ▼▼▼ */
     #result {
-        font-size: clamp(1.2em, 4.5vw, 1.6em);
-        min-height: 1.4em;
-        margin: 5px 0 0 0;
-        padding: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-size: clamp(1.4em, 5vw, 1.8em);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
     }
+    #result.visible {
+        opacity: 1;
+    }
+
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
     
     #history {
@@ -142,7 +160,7 @@
         padding: 0;
         margin: 10px 0 0 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
-        flex-shrink: 1;
+        flex-grow: 1; /* 残りのスペースを履歴が埋める */
         overflow-y: auto;
         display: none;
     }
@@ -191,10 +209,10 @@
         cursor: pointer;
     }
     
-    .correct { color: #28a745; }
-    .wrong { color: #dc3545; }
+    .correct { color: white; background-color: rgba(40, 167, 69, 0.9); }
+    .wrong { color: white; background-color: rgba(220, 53, 69, 0.9); }
     #start { background-color: #007bff; color: white; border: none; }
-    #start:disabled, .numpad button:disabled { background-color: #ccc; color: #666; cursor: default; }
+    #start:disabled { background-color: #ccc; color: #666; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
@@ -207,22 +225,23 @@
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <!-- ▼▼▼【ご指示通り】アイコンとタイトルを表示 ▼▼▼ -->
             <div class="header-title">
                 <img class="header-icon" src="apple-touch-icon.png" alt="アプリアイコン">
                 <span class="app-title">九九チャレ🏳‍🌈</span>
             </div>
             <span id="remaining-count"></span>
         </div>
-        <button id="start">スタート</button>
+        <div class="start-result-area">
+            <button id="start">スタート</button>
+            <p id="result"></p>
+        </div>
         <div id="question-area">
             <p id="question"></p>
             <p id="next-question"></p>
         </div>
         <input id="answer" type="text" readonly>
-        <p id="result"></p>
-        <p id="time"></p>
         <ul id="history"></ul>
+        <p id="time"></p>
     </div>
     <div class="right-panel">
         <div class="numpad">
@@ -289,14 +308,17 @@
         retryCount = 0;
         historyEl.innerHTML = "";
         historyEl.classList.remove('visible');
+        resultEl.classList.remove('visible');
         resultEl.textContent = "";
         timeEl.innerHTML = "";
         questionEl.classList.remove('finish-message');
         congratsImageWrapper.classList.remove('visible');
         
+        // UI表示をリセット
         answerInput.style.display = '';
         nextQuestionEl.style.display = '';
-        startButton.disabled = true;
+        timeEl.style.display = '';
+        startButton.style.visibility = 'hidden';
 
         isGameActive = true;
         isProcessing = false;
@@ -324,7 +346,6 @@
             nextQuestionEl.textContent = "さいごのもんだい！";
         }
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
-        resultEl.textContent = "";
     }
 
     // 回答の自動送信（変更なし）
@@ -345,20 +366,21 @@
         li.textContent = `${questionEl.textContent} = ${value}`;
         if (isCorrect) {
             resultEl.textContent = "正解！";
-            resultEl.className = "correct";
+            resultEl.className = "correct visible";
             li.className = "correct";
             currentQuestionIndex++;
         } else {
             resultEl.textContent = "ちがうよ！";
-            resultEl.className = "wrong";
+            resultEl.className = "wrong visible";
             li.className = "wrong";
             retryCount++;
         }
         setTimeout(() => {
             answerInput.value = "";
+            resultEl.classList.remove('visible');
             if(isCorrect) setQuestion();
             isProcessing = false;
-        }, 400);
+        }, 600);
         historyEl.prepend(li);
     }
 
@@ -368,22 +390,25 @@
         const elapsed = endTime - startTime;
         const minutes = Math.floor(elapsed / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
-        timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
+        
         questionEl.textContent = "よくがんばりました！";
         questionEl.classList.add('finish-message');
         
+        // 不要なUIを非表示に
         nextQuestionEl.style.display = 'none';
         answerInput.style.display = 'none';
         resultEl.textContent = "";
+        timeEl.style.display = 'none';
 
         remainingEl.textContent = "おつかれさま！";
         historyEl.classList.add('visible');
+        
         if (document.getElementById('congrats-image').src.includes('http')) {
             congratsImageWrapper.classList.add('visible');
         }
         isGameActive = false;
         disableInputs();
-        startButton.disabled = false;
+        startButton.style.visibility = 'visible';
         startButton.textContent = "もういちどチャレンジ！";
     }
     
