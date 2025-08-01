@@ -69,6 +69,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0; /* ヘッダーは縮まない */
     }
     .header-title {
         display: flex;
@@ -92,13 +93,15 @@
     .start-result-area {
         position: relative;
         margin: 10px 0;
+        flex-shrink: 0; /* スタートボタンエリアは縮まない */
     }
 
     /* ▼▼▼【ご指示通り】レイアウト構造を最終FIX ▼▼▼ */
     .game-area {
+        flex-grow: 1; /* ゲームエリアが残りのスペースを埋める */
         display: flex;
         flex-direction: column;
-        align-items: center; /* 全体を中央揃えに */
+        justify-content: center; /* 全体を垂直方向に中央揃え */
     }
 
     #question-area {
@@ -119,14 +122,15 @@
     #answer {
         font: 700 clamp(3em, 11vw, 4.5em) 'M PLUS Rounded 1c', sans-serif;
         width: 100%;
-        max-width: 400px; /* PCでの横幅を制限 */
+        max-width: 400px;
         height: 1.5em;
         text-align: center;
         border: 2px solid #ccc;
         border-radius: 8px;
         box-sizing: border-box;
         background-color: #f9f9f9;
-        margin-top: 5px;
+        margin-top: 1em; /* 【ご指示通り】問題との間に1行分のスペース */
+        align-self: center; /* 中央揃え */
         caret-color: transparent;
     }
     
@@ -167,7 +171,7 @@
         padding: 0;
         margin: 0;
         font-size: clamp(0.8em, 3vw, 1.1em);
-        flex-grow: 1;
+        flex-grow: 1; /* ▼▼▼【ご指示通り】履歴エリアがスクロールするよう修正▼▼▼ */
         overflow-y: auto;
         border-top: 1px solid #eee;
         padding-top: 10px;
@@ -223,7 +227,6 @@
             <button id="start">スタート</button>
             <p id="result"></p>
         </div>
-        <!-- ▼▼▼ ゲーム中と終了後で表示を切り替えるエリア ▼▼▼ -->
         <div class="game-area">
             <div id="question-area">
                 <p id="question"></p>
@@ -232,7 +235,8 @@
             <input id="answer" type="text" readonly>
         </div>
         <div class="finish-info">
-            <!-- 終了後にタイムと履歴が表示される -->
+            <p id="time"></p>
+            <ul id="history"></ul>
         </div>
     </div>
     <div class="right-panel">
@@ -260,8 +264,8 @@
     const nextQuestionEl = document.getElementById("next-question");
     const answerInput = document.getElementById("answer");
     const resultEl = document.getElementById("result");
-    const timeEl = document.createElement('p'); // 終了後に動的に追加
-    const historyEl = document.createElement('ul'); // 終了後に動的に追加
+    const timeEl = document.getElementById("time");
+    const historyEl = document.getElementById("history");
     const remainingEl = document.getElementById("remaining-count");
     const numpadButtons = document.querySelectorAll(".numpad button");
     const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
@@ -307,7 +311,7 @@
         // UI表示をリセット
         gameArea.style.display = 'flex';
         finishInfo.style.display = 'none';
-        finishInfo.innerHTML = ''; // 終了情報エリアをクリア
+        finishInfo.innerHTML = '';
         
         startButton.style.visibility = 'hidden';
         congratsImageWrapper.classList.remove('visible');
@@ -383,7 +387,6 @@
         const minutes = Math.floor(elapsed / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
         
-        // ▼▼▼【ご指示通り】終了画面のUIをFIX ▼▼▼
         gameArea.style.display = 'none';
         finishInfo.style.display = 'flex';
         
