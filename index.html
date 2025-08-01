@@ -6,17 +6,12 @@
 
 <meta name="theme-color" content="#007bff"/>
 <link rel="manifest" href="manifest.json">
-
-<!-- ▼▼▼ 【アイコン修正】Appleデバイス用の設定を修正・強化 ▼▼▼ -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- 背景が不透明な、Apple専用のアイコンを指定します -->
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <title>かけ算にチャレンジ！</title>
-<!-- 通常のファビコンも残しておきます -->
 <link rel="icon" href="favicon.ico">
-
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +29,9 @@
         touch-action: manipulation;
     }
 
-    /* 基本レイアウト（スマホ縦画面） */
+    /* ▼▼▼ 【根本解決】ベースのレイアウトとサイズを全面的に見直し ▼▼▼ */
+
+    /* 基本レイアウト（iPhone SE 縦画面でもスクロールしないサイズ） */
     .container {
         display: flex;
         flex-direction: column;
@@ -55,7 +52,7 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 0;
-        font-size: 1.5em;
+        font-size: 1.2em; /* 縮小 */
     }
     #remaining-count {
         font-size: 0.6em;
@@ -69,79 +66,74 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 7em;
+        height: 6.5em; /* 縮小 */
         text-align: center;
     }
     #question {
-        font-size: 3em;
+        font-size: 2.8em; /* 縮小 */
         line-height: 1.2;
     }
     #next-question {
-        font-size: 1.6em;
-        margin-top: 0.5em;
-        min-height: 1.5em;
+        font-size: 1.5em; /* 縮小 */
+        margin-top: 0.4em;
+        min-height: 1.4em;
     }
     #answer {
-        font-size: 3em;
+        font-size: 2.8em; /* 縮小 */
         width: 100%;
         height: 1.5em;
-        margin-top: 0.5em;
+        margin-top: 0.4em;
     }
+    #time { font-size: 1em; line-height: 1.5; } /* 縮小 */
+    #result {
+        font-size: 1.2em; /* 縮小 */
+        min-height: 1.4em;
+        margin-top: 0;
+        padding-top: 0.2em;
+    }
+    #start { width: 100%; padding: 10px; font-size: 1.2em; } /* 縮小 */
+    #history { font-size: 0.9em; max-height: 70px; } /* 縮小 */
+    
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .numpad button {
+        font-size: 1.5em; /* 縮小 */
+        padding: 10px; /* 縮小 */
+    }
+    #fullscreen-btn {
+        position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px;
+        background-color: rgba(0, 0, 0, 0.5); color: white; border: none;
+        border-radius: 50%; font-size: 20px; display: flex; align-items: center;
+        justify-content: center; cursor: pointer; z-index: 1000;
+    }
+
     /* （共通の細かいスタイルは省略） */
     #question.finish-message { font-size: 1.6em; }
     #answer, .numpad button { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; }
     #answer { text-align: center; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; background-color: #f9f9f9; caret-color: transparent; }
-    #time { font-size: 1.1em; line-height: 1.6; }
-    #result { font-size: 1.2em; min-height: 1.5em; margin-top: 0; padding-top: 0.2em; }
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
-    #start { width: 100%; padding: 12px; font-size: 1.4em; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 8px; }
-    #start:disabled { background-color: #ccc; }
-    #history { font-size: 1em; list-style-type: none; padding-left: 0; margin-top: 1em; max-height: 100px; overflow-y: auto; }
     #history li { padding: 4px; border-bottom: 1px solid #eee; }
-
-    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .numpad button {
-        font-size: 1.6em;
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        background-color: #fff;
-        cursor: pointer;
-    }
+    .numpad button { border-radius: 8px; border: 1px solid #ccc; background-color: #fff; cursor: pointer; }
     .numpad button:disabled { background-color: #f8f8f8; color: #ccc; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
-    
     #congrats-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
     #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
     #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
-    #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; }
-
-    /* ▼▼▼ 【レイアウト修正】iPhone横画面など、高さが狭い画面に特化したスタイル ▼▼▼ */
-    @media (max-height: 450px) and (orientation: landscape) {
-        .container {
-            flex-direction: row;
-            gap: 8px;
-        }
-        .left-panel, .right-panel {
-            padding: 8px;
-        }
-        h1 { font-size: 1.2em; }
-        #question-area { height: 6em; }
-        #question { font-size: 2.5em; }
-        #next-question { font-size: 1.2em; }
-        #answer { font-size: 2.5em; }
-        #result { font-size: 1em; }
-        .numpad { gap: 5px; }
-        .numpad button { font-size: 1.3em; padding: 8px; }
-        #history { display: none; } /* 横画面では履歴を非表示にしてスペース確保 */
-        #time { font-size: 1em; }
-    }
     
-    /* iPad縦画面など、中くらいの画面向けのスタイル */
+    /* 【最重要】iPhone SE 横画面などに対応 (幅481px以上) */
+    @media (min-width: 481px) {
+        .container {
+            flex-direction: row; /* 横並びにする */
+        }
+        /* 横画面では履歴を非表示にしてスペースを確保 */
+        #history {
+            display: none;
+        }
+    }
+
+    /* iPadなど中くらいの画面向けのスタイル (幅768px以上) */
     @media (min-width: 768px) {
-        .container { flex-direction: row; }
         .left-panel, .right-panel { padding: 15px; }
         h1 { font-size: 1.8em; }
         #question-area { height: 8em; }
@@ -150,10 +142,11 @@
         #answer { font-size: 3.5em; }
         #result { font-size: 1.4em; }
         .numpad button { font-size: 1.8em; padding: 15px; }
+        #history { display: block; } /* 中画面以上では履歴を再表示 */
     }
 
-    /* PCや大型タブレット向けの、より大きなスタイル */
-    @media (min-width: 992px) {
+    /* PCや大型タブレット向けの、より大きなスタイル (幅1024px以上) */
+    @media (min-width: 1024px) {
         .left-panel, .right-panel { padding: 20px; }
         h1 { font-size: 2.5em; }
         #question-area { height: 10em; }
