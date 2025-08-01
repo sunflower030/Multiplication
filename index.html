@@ -3,15 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 【追加】PWAのための設定 -->
+<meta name="theme-color" content="#007bff"/>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="favicon-192.png">
+
 <title>かけ算にチャレンジ！</title>
-<!-- ▼▼▼ この1行を追加 ▼▼▼ -->
 <link rel="icon" href="favicon.ico">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 
 <style>
-    /* 全体の設定 */
+    /* （中略）今までのCSSは全く同じなので省略します */
     body {
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
@@ -20,8 +26,6 @@
         background-color: #f0f0f0;
         user-select: none;
     }
-
-    /* 左右分割レイアウト */
     .container {
         display: flex;
         flex-wrap: wrap;
@@ -35,12 +39,9 @@
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .right-panel {
         position: relative;
     }
-
-    /* 見出しと残り問題数 */
     h1 {
         display: flex;
         justify-content: space-between;
@@ -55,8 +56,6 @@
         border-radius: 20px;
         white-space: nowrap;
     }
-
-    /* 問題表示エリアのスタイル */
     #question-area {
         display: flex;
         flex-direction: column;
@@ -82,8 +81,6 @@
         margin-top: 0.5em;
         min-height: 1.5em;
     }
-
-    /* 回答入力欄のスタイル */
     #answer {
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
@@ -102,8 +99,6 @@
     #answer::-webkit-outer-spin-button,
     #answer::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #answer[type=number] { -moz-appearance: textfield; }
-
-    /* 結果表示のスタイル */
     #time { font-size: 1.2em; line-height: 1.6; }
     #result {
         font-size: 1.5em;
@@ -113,24 +108,16 @@
     }
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
-
-    /* スタートボタン */
     #start { width: 100%; padding: 15px; font-size: 1.5em; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 8px; }
     #start:disabled { background-color: #ccc; }
-
-    /* 履歴のリスト */
     #history { font-size: 1.1em; list-style-type: none; padding-left: 0; margin-top: 1em; max-height: 150px; overflow-y: auto; }
     #history li { padding: 5px; border-bottom: 1px solid #eee; }
-
-    /* 右パネル（テンキー）のスタイル */
     .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .numpad button { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; font-size: 2em; padding: 25px; border-radius: 8px; border: 1px solid #ccc; background-color: #fff; cursor: pointer; transition: background-color 0.2s; }
     .numpad button:hover:not(:disabled) { background-color: #e9e9e9; }
     .numpad button:disabled { background-color: #f8f8f8; color: #ccc; cursor: default; }
     .numpad .clear { background-color: #ffc107; }
     .numpad .backspace { background-color: #fd7e14; color: white; }
-
-    /* クリアごほうび画像のスタイル */
     #congrats-image-wrapper {
         position: absolute;
         top: 0;
@@ -155,12 +142,35 @@
         max-height: 90%;
         object-fit: contain;
     }
+
+    /* 【追加】全画面ボタンのスタイル */
+    #fullscreen-btn {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1000;
+    }
 </style>
 </head>
 <body>
 
+<!-- 【追加】全画面ボタン -->
+<button id="fullscreen-btn" title="全画面表示">⛶</button>
+
 <div class="container">
     <div class="left-panel">
+        <!-- （中略）左パネルの中身は変更なし -->
         <h1>かけ算にチャレンジ！<span id="remaining-count"></span></h1>
         <button id="start">スタート</button>
         <div id="question-area">
@@ -173,6 +183,7 @@
         <ul id="history"></ul>
     </div>
     <div class="right-panel">
+        <!-- （中略）右パネルの中身は変更なし -->
         <div class="numpad">
             <button class="num">7</button><button class="num">8</button><button class="num">9</button>
             <button class="num">4</button><button class="num">5</button><button class="num">6</button>
@@ -180,206 +191,201 @@
             <button class="clear">クリア</button><button class="num">0</button><button class="backspace">けす</button>
         </div>
         <div id="congrats-image-wrapper">
-            <!-- ▼▼▼ この下のsrc=""に画像の直接リンクを貼り付けてください ▼▼▼ -->
-            <img id="congrats-image" src="https://github.com/sunflower030/Multiplication/blob/main/iine.png?raw=true" alt="おめでとう！">
+            <img id="congrats-image" src="（ここに画像のURL）" alt="おめでとう！">
         </div>
     </div>
 </div>
 
 <script>
-// --- DOM要素の取得 ---
-const startButton = document.getElementById("start");
-const questionEl = document.getElementById("question");
-const nextQuestionEl = document.getElementById("next-question");
-const answerInput = document.getElementById("answer");
-const resultEl = document.getElementById("result");
-const timeEl = document.getElementById("time");
-const historyEl = document.getElementById("history");
-const remainingEl = document.getElementById("remaining-count");
-const numpadButtons = document.querySelectorAll(".numpad button");
-const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
-const congratsImage = document.getElementById("congrats-image");
+    /* 【追加】PWAのサービスワーカーを登録するスクリプト */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
 
-// --- ゲームの状態を管理する変数 ---
-const MIN = 2, MAX = 9;
-let allQuestions = [];
-let currentQuestionIndex = 0;
-let currentProduct = 0;
-let startTime = 0;
-let isGameActive = false;
-let isProcessing = false;
-let retryCount = 0;
+    // --- DOM要素の取得 ---
+    const startButton = document.getElementById("start");
+    const fullscreenButton = document.getElementById("fullscreen-btn"); // 【追加】
+    // （中略）他のDOM要素取得は変更なし
+    const questionEl = document.getElementById("question");
+    const nextQuestionEl = document.getElementById("next-question");
+    const answerInput = document.getElementById("answer");
+    const resultEl = document.getElementById("result");
+    const timeEl = document.getElementById("time");
+    const historyEl = document.getElementById("history");
+    const remainingEl = document.getElementById("remaining-count");
+    const numpadButtons = document.querySelectorAll(".numpad button");
+    const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
+    const congratsImage = document.getElementById("congrats-image");
 
-// --- ゲームの初期化 ---
-function initializeGame() {
-    // 36通りのユニークな問題リストを作成
-    let combinations = [];
-    for (let i = MIN; i <= MAX; i++) {
-        for (let j = i; j <= MAX; j++) {
-            let numA = i;
-            let numB = j;
-            if (Math.random() < 0.5) {
-                [numA, numB] = [numB, numA];
+    // （中略）ゲームのロジック部分は全て変更なし
+    const MIN = 2, MAX = 9;
+    let allQuestions = [];
+    let currentQuestionIndex = 0;
+    let currentProduct = 0;
+    let startTime = 0;
+    let isGameActive = false;
+    let isProcessing = false;
+    let retryCount = 0;
+
+    function initializeGame() {
+        let combinations = [];
+        for (let i = MIN; i <= MAX; i++) {
+            for (let j = i; j <= MAX; j++) {
+                let numA = i, numB = j;
+                if (Math.random() < 0.5) { [numA, numB] = [numB, numA]; }
+                combinations.push({ numA, numB });
             }
-            combinations.push({ numA, numB });
+        }
+        combinations.sort(() => Math.random() - 0.5);
+        allQuestions = combinations;
+        currentQuestionIndex = 0;
+        retryCount = 0;
+        historyEl.innerHTML = "";
+        resultEl.textContent = "";
+        timeEl.innerHTML = "";
+        answerInput.value = "";
+        questionEl.classList.remove('finish-message');
+        congratsImageWrapper.classList.remove('visible');
+        isGameActive = true;
+        isProcessing = false;
+        startButton.disabled = true;
+        enableInputs();
+        startTime = Date.now();
+        setQuestion();
+    }
+
+    function setQuestion() {
+        if (currentQuestionIndex >= allQuestions.length) {
+            finishGame();
+            return;
+        }
+        const q = allQuestions[currentQuestionIndex];
+        currentProduct = q.numA * q.numB;
+        questionEl.textContent = `${q.numA} × ${q.numB} = □`;
+        if (currentQuestionIndex + 1 < allQuestions.length) {
+            const nextQ = allQuestions[currentQuestionIndex + 1];
+            nextQuestionEl.textContent = `${nextQ.numA} × ${nextQ.numB} = □`;
+        } else {
+            nextQuestionEl.textContent = "さいごのもんだい！";
+        }
+        remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
+        resultEl.textContent = "";
+    }
+
+    function checkAndSubmit() {
+        if (!isGameActive || isProcessing) return;
+        const answerLength = answerInput.value.length;
+        const productLength = String(currentProduct).length;
+        if (answerLength === productLength) {
+            processAnswer();
         }
     }
-    // 問題の順番をシャッフル
-    combinations.sort(() => Math.random() - 0.5);
-    allQuestions = combinations;
 
-    currentQuestionIndex = 0;
-    retryCount = 0;
-    historyEl.innerHTML = "";
-    resultEl.textContent = "";
-    timeEl.innerHTML = "";
-    answerInput.value = "";
-    questionEl.classList.remove('finish-message');
-    congratsImageWrapper.classList.remove('visible'); // 画像を隠す
-
-    isGameActive = true;
-    isProcessing = false;
-    startButton.disabled = true;
-    enableInputs();
-    startTime = Date.now();
-    setQuestion();
-}
-
-// --- 問題の表示・更新 ---
-function setQuestion() {
-    if (currentQuestionIndex >= allQuestions.length) {
-        finishGame();
-        return;
+    function processAnswer() {
+        if (answerInput.value === "") return;
+        isProcessing = true;
+        const value = parseInt(answerInput.value, 10);
+        const isCorrect = (value === currentProduct);
+        const li = document.createElement("li");
+        li.textContent = `${questionEl.textContent.replace('□', value)}`;
+        if (isCorrect) {
+            resultEl.textContent = "正解！";
+            resultEl.className = "correct";
+            li.className = "correct";
+            currentQuestionIndex++;
+            setTimeout(() => {
+                answerInput.value = "";
+                setQuestion();
+                isProcessing = false;
+            }, 400);
+        } else {
+            resultEl.textContent = "ちがうよ、もういちど！";
+            resultEl.className = "wrong";
+            li.className = "wrong";
+            retryCount++;
+            setTimeout(() => {
+                answerInput.value = "";
+                isProcessing = false;
+            }, 400);
+        }
+        historyEl.prepend(li);
     }
-    const q = allQuestions[currentQuestionIndex];
-    currentProduct = q.numA * q.numB;
-    questionEl.textContent = `${q.numA} × ${q.numB} = □`;
 
-    if (currentQuestionIndex + 1 < allQuestions.length) {
-        const nextQ = allQuestions[currentQuestionIndex + 1];
-        nextQuestionEl.textContent = `${nextQ.numA} × ${nextQ.numB} = □`;
-    } else {
-        nextQuestionEl.textContent = "さいごのもんだい！";
+    function finishGame() {
+        const endTime = Date.now();
+        const elapsed = endTime - startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
+        questionEl.textContent = "よくがんばりました！";
+        questionEl.classList.add('finish-message');
+        nextQuestionEl.textContent = "";
+        remainingEl.textContent = "おつかれさま！";
+        resultEl.textContent = "";
+        if (congratsImage.src && congratsImage.src.startsWith('http')) {
+            congratsImageWrapper.classList.add('visible');
+        }
+        isGameActive = false;
+        disableInputs();
+        startButton.disabled = false;
+        startButton.textContent = "もういちどチャレンジ！";
     }
-    remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
-    resultEl.textContent = "";
-}
 
-// --- 答えの桁数に達したら自動で回答を送信 ---
-function checkAndSubmit() {
-    if (!isGameActive || isProcessing) return;
-    const answerLength = answerInput.value.length;
-    const productLength = String(currentProduct).length;
-    if (answerLength === productLength) {
-        processAnswer();
-    }
-}
+    function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
+    function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
 
-// --- 回答処理 ---
-function processAnswer() {
-    if (answerInput.value === "") return;
+    // --- イベントリスナー ---
+    startButton.addEventListener("click", initializeGame);
+
+    // 【追加】全画面ボタンのイベントリスナー
+    fullscreenButton.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`全画面表示にできませんでした: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
     
-    isProcessing = true;
-    const value = parseInt(answerInput.value, 10);
-    const isCorrect = (value === currentProduct);
-
-    const li = document.createElement("li");
-    li.textContent = `${questionEl.textContent.replace('□', value)}`;
-
-    if (isCorrect) {
-        resultEl.textContent = "正解！";
-        resultEl.className = "correct";
-        li.className = "correct";
-        currentQuestionIndex++;
-        
-        setTimeout(() => {
-            answerInput.value = "";
-            setQuestion();
-            isProcessing = false;
-        }, 400);
-
-    } else {
-        resultEl.textContent = "ちがうよ、もういちど！";
-        resultEl.className = "wrong";
-        li.className = "wrong";
-        retryCount++;
-
-        setTimeout(() => {
-            answerInput.value = "";
-            isProcessing = false;
-        }, 400);
-    }
-    historyEl.prepend(li);
-}
-
-// --- ゲーム終了処理 ---
-function finishGame() {
-    const endTime = Date.now();
-    const elapsed = endTime - startTime;
-    const minutes = Math.floor(elapsed / 60000);
-    const seconds = Math.floor((elapsed % 60000) / 1000);
-
-    timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
-    
-    questionEl.textContent = "よくがんばりました！";
-    questionEl.classList.add('finish-message');
-    nextQuestionEl.textContent = "";
-    remainingEl.textContent = "おつかれさま！";
-    resultEl.textContent = "";
-    
-    // ごほうび画像を表示
-    if (congratsImage.src && congratsImage.src.startsWith('http')) {
-        congratsImageWrapper.classList.add('visible');
-    }
-    
-    isGameActive = false;
-    disableInputs();
-    startButton.disabled = false;
-    startButton.textContent = "もういちどチャレンジ！";
-}
-
-// --- 入力系の有効/無効化 ---
-function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
-function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
-
-// --- イベントリスナー ---
-startButton.addEventListener("click", initializeGame);
-
-// 画面上のテンキーの処理
-numpadButtons.forEach(button => {
-    button.addEventListener("click", () => {
+    // （中略）他のイベントリスナーは変更なし
+    numpadButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            if (!isGameActive || isProcessing) return;
+            const action = button.classList;
+            if (action.contains('num')) {
+                if (answerInput.value.length < 2) {
+                    answerInput.value += button.textContent;
+                    checkAndSubmit();
+                }
+            } else if (action.contains('clear')) {
+                answerInput.value = "";
+            } else if (action.contains('backspace')) {
+                answerInput.value = answerInput.value.slice(0, -1);
+            }
+        });
+    });
+    document.addEventListener('keydown', (e) => {
         if (!isGameActive || isProcessing) return;
-        const action = button.classList;
-        if (action.contains('num')) {
+        if (e.key >= '0' && e.key <= '9') {
             if (answerInput.value.length < 2) {
-                answerInput.value += button.textContent;
+                answerInput.value += e.key;
                 checkAndSubmit();
             }
-        } else if (action.contains('clear')) {
-            answerInput.value = "";
-        } else if (action.contains('backspace')) {
+        } else if (e.key === 'Backspace') {
             answerInput.value = answerInput.value.slice(0, -1);
         }
     });
-});
 
-// キーボード入力の処理
-document.addEventListener('keydown', (e) => {
-    if (!isGameActive || isProcessing) return;
-    if (e.key >= '0' && e.key <= '9') {
-        if (answerInput.value.length < 2) {
-            answerInput.value += e.key;
-            checkAndSubmit();
-        }
-    } else if (e.key === 'Backspace') {
-        answerInput.value = answerInput.value.slice(0, -1);
-    }
-});
-
-// --- 初期状態設定 ---
-disableInputs();
-remainingEl.textContent = `ぜんぶで 36 もん`;
-
+    // --- 初期状態設定 ---
+    disableInputs();
+    remainingEl.textContent = `ぜんぶで 36 もん`;
 </script>
 </body>
 </html>
