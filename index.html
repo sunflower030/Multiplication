@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
 <meta name="theme-color" content="#007bff"/>
 <link rel="manifest" href="manifest.json">
@@ -26,17 +26,19 @@
         padding: 0.5em;
         background-color: #f0f0f0;
         user-select: none;
+        /* iOSでのダブルタップによるズームを防止 */
+        touch-action: manipulation;
     }
 
-    /* 【変更】レイアウトの基本を「縦並び（モバイル優先）」に */
+    /* 基本レイアウト（スマホ縦画面） */
     .container {
         display: flex;
-        flex-direction: column; /* iPhone縦画面での基本は縦並び */
+        flex-direction: column;
         gap: 10px;
     }
     .left-panel, .right-panel {
         flex: 1;
-        padding: 15px; /* 少しだけ余白を狭く */
+        padding: 10px;
         background-color: white;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -49,13 +51,13 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 0;
-        font-size: 1.8em; /* 基本のサイズを少し調整 */
+        font-size: 1.5em;
     }
     #remaining-count {
-        font-size: 0.5em;
+        font-size: 0.6em;
         color: #333;
         background-color: #e9e9e9;
-        padding: 5px 12px;
+        padding: 4px 10px;
         border-radius: 20px;
         white-space: nowrap;
     }
@@ -64,20 +66,20 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 8em; /* 少し高さを詰める */
+        height: 7em;
         text-align: center;
     }
     #question {
-        font-size: 3.5em; /* 基本サイズ */
+        font-size: 3em;
         color: #333;
         margin: 0;
         line-height: 1.2;
     }
     #question.finish-message {
-        font-size: 1.8em; /* 終了メッセージも調整 */
+        font-size: 1.6em;
     }
     #next-question {
-        font-size: 1.8em; /* 基本サイズ */
+        font-size: 1.6em;
         color: #aaa;
         margin-top: 0.5em;
         min-height: 1.5em;
@@ -85,7 +87,7 @@
     #answer {
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
-        font-size: 3.5em; /* 基本サイズ */
+        font-size: 3em;
         width: 100%;
         height: 1.5em;
         text-align: center;
@@ -98,23 +100,23 @@
     }
     #time { font-size: 1.1em; line-height: 1.6; }
     #result {
-        font-size: 1.4em;
+        font-size: 1.2em;
         min-height: 1.5em;
         margin-top: 0;
         padding-top: 0.2em;
     }
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
-    #start { width: 100%; padding: 15px; font-size: 1.5em; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 8px; }
+    #start { width: 100%; padding: 12px; font-size: 1.4em; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 8px; }
     #start:disabled { background-color: #ccc; }
-    #history { font-size: 1.1em; list-style-type: none; padding-left: 0; margin-top: 1em; max-height: 150px; overflow-y: auto; }
-    #history li { padding: 5px; border-bottom: 1px solid #eee; }
-    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    #history { font-size: 1em; list-style-type: none; padding-left: 0; margin-top: 1em; max-height: 100px; overflow-y: auto; }
+    #history li { padding: 4px; border-bottom: 1px solid #eee; }
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .numpad button {
         font-family: 'M PLUS Rounded 1c', sans-serif;
         font-weight: 700;
-        font-size: 1.8em; /* 基本サイズ */
-        padding: 15px; /* 基本サイズ */
+        font-size: 1.6em;
+        padding: 12px;
         border-radius: 8px;
         border: 1px solid #ccc;
         background-color: #fff;
@@ -135,20 +137,31 @@
     #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
     #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
     #fullscreen-btn {
-        position: fixed; bottom: 15px; right: 15px; width: 50px; height: 50px;
+        position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px;
         background-color: rgba(0, 0, 0, 0.5); color: white; border: none;
-        border-radius: 50%; font-size: 24px; display: flex; align-items: center;
+        border-radius: 50%; font-size: 20px; display: flex; align-items: center;
         justify-content: center; cursor: pointer; z-index: 1000;
     }
 
-    /* 【追加】iPhone横画面や小型タブレット向けのスタイル (幅が580px以上) */
-    @media (min-width: 580px) {
+    /* 【修正】iPhone SE横画面などに対応 (幅481px以上) */
+    @media (min-width: 481px) {
         .container {
             flex-direction: row; /* 横並びに変更 */
         }
+        .left-panel, .right-panel {
+            padding: 15px;
+        }
+        h1 { font-size: 1.8em; }
+        #question-area { height: 8em; }
+        #question { font-size: 3.5em; }
+        #question.finish-message { font-size: 1.8em; }
+        #next-question { font-size: 1.8em; }
+        #answer { font-size: 3.5em; }
+        #result { font-size: 1.4em; }
+        .numpad button { font-size: 1.8em; padding: 15px; }
     }
 
-    /* 【追加】PCや大型タブレット向けの、より大きなスタイル (幅が992px以上) */
+    /* PCや大型タブレット向けの、より大きなスタイル (幅992px以上) */
     @media (min-width: 992px) {
         .left-panel, .right-panel { padding: 20px; }
         h1 { font-size: 2.5em; }
@@ -233,17 +246,20 @@
     let isProcessing = false;
     let retryCount = 0;
 
+    // --- ゲームの初期化 ---
     function initializeGame() {
+        // 【修正】ご指定のアルゴリズムをシンプルかつ確実に実装
         let combinations = [];
+        // 1. まず36通りのユニークな組み合わせをすべて生成
         for (let i = MIN; i <= MAX; i++) {
             for (let j = i; j <= MAX; j++) {
-                let numA = i, numB = j;
-                if (Math.random() < 0.5) { [numA, numB] = [numB, numA]; }
-                combinations.push({ numA, numB });
+                combinations.push({ numA: i, numB: j });
             }
         }
+        // 2. 生成したリスト全体をシャッフル
         combinations.sort(() => Math.random() - 0.5);
         allQuestions = combinations;
+
         currentQuestionIndex = 0;
         retryCount = 0;
         historyEl.innerHTML = "";
@@ -252,6 +268,7 @@
         answerInput.value = "";
         questionEl.classList.remove('finish-message');
         congratsImageWrapper.classList.remove('visible');
+
         isGameActive = true;
         isProcessing = false;
         startButton.disabled = true;
@@ -260,20 +277,35 @@
         setQuestion();
     }
 
+    // --- 問題の表示・更新 ---
     function setQuestion() {
         if (currentQuestionIndex >= allQuestions.length) {
             finishGame();
             return;
         }
-        const q = allQuestions[currentQuestionIndex];
-        currentProduct = q.numA * q.numB;
-        questionEl.textContent = `${q.numA} × ${q.numB} = □`;
+        
+        let { numA, numB } = allQuestions[currentQuestionIndex];
+        
+        // 【修正】毎回50%の確率で数字を入れ替える
+        if (Math.random() < 0.5) {
+            [numA, numB] = [numB, numA];
+        }
+
+        currentProduct = numA * numB;
+        questionEl.textContent = `${numA} × ${numB} = □`;
+
+        // 次の問題のプレビューも同様に入れ替えを考慮
         if (currentQuestionIndex + 1 < allQuestions.length) {
-            const nextQ = allQuestions[currentQuestionIndex + 1];
-            nextQuestionEl.textContent = `${nextQ.numA} × ${nextQ.numB} = □`;
+            let nextA = allQuestions[currentQuestionIndex + 1].numA;
+            let nextB = allQuestions[currentQuestionIndex + 1].numB;
+            if (Math.random() < 0.5) {
+                [nextA, nextB] = [nextB, nextA];
+            }
+            nextQuestionEl.textContent = `${nextA} × ${nextB} = □`;
         } else {
             nextQuestionEl.textContent = "さいごのもんだい！";
         }
+        
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
         resultEl.textContent = "";
     }
