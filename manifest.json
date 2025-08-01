@@ -1,8 +1,9 @@
 {
   "name": "かけ算にチャレンジ！",
-  "short_name": "かけ算",
+  "short_name": "九九チャレ",
   "start_url": ".",
-  "display": "fullscreen",  /* ← ここを変更しました */
+  "scope": ".",
+  "display": "fullscreen",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
   "description": "九九を楽しく練習するアプリです。",
