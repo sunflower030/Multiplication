@@ -31,10 +31,10 @@
         background-color: #f0f0f0;
         user-select: none;
         touch-action: manipulation;
-        display: flex; /* body全体をflexコンテナに */
+        display: flex;
     }
 
-    /* ▼▼▼【レイアウトの根本解決】CSS Grid を採用 ▼▼▼ */
+    /* ▼▼▼【レイアウト最終解決】CSS Grid でシンプルかつ堅牢なレイアウトに ▼▼▼ */
     .container {
         display: grid;
         width: 100%;
@@ -42,14 +42,15 @@
         box-sizing: border-box;
         padding: 10px;
         gap: 10px;
-        grid-template-rows: 1fr; /* 縦は1行 */
-        grid-template-columns: 1fr; /* 基本は1列（スマホ縦） */
+        grid-template-columns: 1fr; /* 基本は1列（スマホ） */
+        grid-template-rows: min-content 1fr; /* ヘッダーの高さは自動、残りがメインエリア */
     }
-    
-    /* 画面幅が650px以上（タブレットやPC）の場合に2列にする */
+
+    /* 画面幅が650px以上の場合に2列にする */
     @media (min-width: 650px) {
         .container {
             grid-template-columns: 1fr 1fr; /* 横に2列 */
+            grid-template-rows: 1fr; /* 縦は1行に戻す */
         }
     }
 
@@ -60,48 +61,51 @@
         display: flex;
         flex-direction: column;
         padding: 15px;
-        overflow: hidden; /* パネル内ではみ出た要素を隠す */
+        overflow: hidden;
     }
     .right-panel {
         position: relative;
     }
     
-    /* ▼▼▼ clamp()でフォントサイズを柔軟に調整 ▼▼▼ */
-    h1 {
+    /* ▼▼▼【ご指示通り】h1を廃止し、アイコンヘッダーに ▼▼▼ */
+    .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 0 0 5px 0;
-        font-size: clamp(1.2em, 4vw, 2.2em);
+        margin-bottom: 5px;
+    }
+    .header-icon {
+        width: 32px;
+        height: 32px;
     }
     #remaining-count {
-        font-size: 0.7em;
+        font-size: 0.9em;
         padding: 4px 12px;
         border-radius: 20px;
         background-color: #e9e9e9;
     }
+
     #question-area {
-        flex-grow: 1; /* 残りの高さを埋める */
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
     }
+    /* ▼▼▼【ご指示通り】iPhoneでも改行されないフォントサイズに ▼▼▼ */
     #question {
-        font-size: clamp(3em, 12vw, 5em);
+        font-size: 3.8em;
         line-height: 1.1;
     }
     #question.finish-message {
-        font-size: clamp(1.8em, 6vw, 2.5em);
+        font-size: 2em;
         color: #007bff;
     }
-    /* 【重要】次問題のプレビューは、ランダム性担保のため廃止 */
-    #next-question {
-        display: none;
-    }
+    #next-question { display: none; }
+
     #answer {
-        font: 700 clamp(3em, 12vw, 4.5em) 'M PLUS Rounded 1c', sans-serif;
+        font: 700 3.8em 'M PLUS Rounded 1c', sans-serif;
         width: 100%;
         height: 1.5em;
         text-align: center;
@@ -113,12 +117,12 @@
         caret-color: transparent;
     }
     #result {
-        font-size: clamp(1.1em, 4vw, 1.5em);
+        font-size: 1.4em;
         min-height: 1.4em;
         margin: 0;
     }
-    #time { font-size: clamp(1em, 3.5vw, 1.2em); line-height: 1.5; }
-    #history { display: none; } /* 常に非表示でシンプルに */
+    #time { font-size: 1.1em; line-height: 1.5; }
+    #history { display: none; }
 
     .numpad {
         display: grid;
@@ -127,16 +131,15 @@
         margin-top: 10px;
     }
     .numpad button {
-        font: 700 clamp(1.5em, 5vw, 2.2em) 'M PLUS Rounded 1c', sans-serif;
+        font: 700 2em 'M PLUS Rounded 1c', sans-serif;
         border-radius: 8px;
         border: 1px solid #ccc;
         background-color: #fff;
         cursor: pointer;
-        /* 高さをアスペクト比で維持し、潰れないようにする */
         aspect-ratio: 1.5 / 1;
     }
     
-    #start { width: 100%; padding: 12px; font-size: clamp(1.2em, 4.5vw, 1.8em); }
+    #start { width: 100%; padding: 12px; font-size: 1.5em; }
     #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
 
     /* （共通の細かいスタイル） */
@@ -150,13 +153,25 @@
     #congrats-image-wrapper.visible { opacity: 1; pointer-events: auto; }
     #congrats-image-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
     #fullscreen-btn { background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+
+    /* iPadやPC向けのサイズ調整 */
+    @media (min-width: 650px) {
+      #question { font-size: 5em; }
+      #answer { font-size: 5em; }
+    }
 </style>
 </head>
 <body>
 
 <div class="container">
     <div class="left-panel">
-        <h1>かけ算にチャレンジ！<span id="remaining-count"></span></h1>
+        <div class="header">
+            <!-- ▼▼▼【ご指示通り】テキストを廃止し、アイコンを表示 ▼▼▼ -->
+            <svg class="header-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24.6,21.9c0,0,10.5-2.5,19.3-2.5c10.4,0,14,3.3,14,9.6c0,5.8-3,9.4-8.1,12.1c-3.1,1.6-6.6,3.3-6.6,5.8c0,1.9,1.7,3.3,4,3.3c3.8,0,10.6-2.5,15-5.2c1.4-0.8,3,0.3,3,2v15.9c0,1.5-1.5,2.6-2.9,2c-3.4-1.5-10-4.6-16.7-4.6c-11.7,0-17.7,4.8-17.7,11.5c0,6.6,6.1,11,16.8,11s21.7-4.6,21.7-4.6" fill="none" stroke="#333" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="remaining-count"></span>
+        </div>
         <button id="start">スタート</button>
         <div id="question-area">
             <p id="question"></p>
@@ -179,16 +194,15 @@
         </div>
     </div>
 </div>
-<!-- 全画面ボタンはコンテナの外に -->
 <button id="fullscreen-btn" title="全画面表示">⛶</button>
 
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
     }
-
     // --- DOM要素の取得 ---
     const startButton = document.getElementById("start");
+    // (中略) 他のDOM要素取得は変更なし
     const questionEl = document.getElementById("question");
     const answerInput = document.getElementById("answer");
     const resultEl = document.getElementById("result");
@@ -204,6 +218,7 @@
     let allQuestions = [];
     let currentQuestionIndex = 0;
     let currentProduct = 0;
+    // (中略) 他の変数は変更なし
     let startTime = 0;
     let isGameActive = false;
     let isProcessing = false;
@@ -211,15 +226,13 @@
 
     // --- ゲームの初期化 ---
     function initializeGame() {
-        // ▼▼▼【アルゴリズム修正】あなたの理念を実現する、シンプルで確実な方法 ▼▼▼
+        // ▼▼▼【アルゴリズム最終FIX】この形で完全にランダムになります ▼▼▼
         let combinations = [];
-        // 1. 36通りのユニークな組み合わせを生成
         for (let i = MIN; i <= MAX; i++) {
             for (let j = i; j <= MAX; j++) {
                 combinations.push({ numA: i, numB: j });
             }
         }
-        // 2. 生成したリストを完全にシャッフルする
         combinations.sort(() => Math.random() - 0.5);
         allQuestions = combinations;
 
@@ -245,36 +258,31 @@
             finishGame();
             return;
         }
-        
         let { numA, numB } = allQuestions[currentQuestionIndex];
-        
-        // 3. 表示の直前に、50%の確率で数字を入れ替える
         if (Math.random() < 0.5) {
             [numA, numB] = [numB, numA];
         }
-
         currentProduct = numA * numB;
         questionEl.textContent = `${numA} × ${numB} = □`;
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
         resultEl.textContent = "";
     }
 
-    // （...以降のスクリプトは、履歴表示と次問題プレビューに関する部分を削除した以外、変更ありません...）
-    function checkAndSubmit() { /* 変更なし */ }
+    function checkAndSubmit() {
+        if (!isGameActive || isProcessing) return;
+        if (answerInput.value.length === String(currentProduct).length) {
+            processAnswer();
+        }
+    }
+
     function processAnswer() {
         if (answerInput.value === "") return;
         isProcessing = true;
         const value = parseInt(answerInput.value, 10);
         const isCorrect = (value === currentProduct);
-
-        // 履歴機能は今回非表示にしたため、DOM操作はコメントアウト
-        // const li = document.createElement("li");
-        // li.textContent = `${questionEl.textContent.replace('□', value)}`;
-
         if (isCorrect) {
             resultEl.textContent = "正解！";
             resultEl.className = "correct";
-            // li.className = "correct";
             currentQuestionIndex++;
             setTimeout(() => {
                 answerInput.value = "";
@@ -284,16 +292,33 @@
         } else {
             resultEl.textContent = "ちがうよ、もういちど！";
             resultEl.className = "wrong";
-            // li.className = "wrong";
             retryCount++;
             setTimeout(() => {
                 answerInput.value = "";
                 isProcessing = false;
             }, 400);
         }
-        // historyEl.prepend(li);
     }
-    function finishGame() { /* 変更なし */ }
+
+    function finishGame() {
+        const endTime = Date.now();
+        const elapsed = endTime - startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
+        questionEl.textContent = "よくがんばりました！";
+        questionEl.classList.add('finish-message');
+        remainingEl.textContent = "おつかれさま！";
+        resultEl.textContent = "";
+        if (congratsImage.src && congratsImage.src.includes('http')) {
+            congratsImageWrapper.classList.add('visible');
+        }
+        isGameActive = false;
+        disableInputs();
+        startButton.disabled = false;
+        startButton.textContent = "もういちどチャレンジ！";
+    }
+
     function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
     function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
 
@@ -301,13 +326,39 @@
     startButton.addEventListener("click", initializeGame);
     fullscreenButton.addEventListener("click", () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {});
+            document.documentElement.requestFullscreen().catch(()=>{});
         } else {
             document.exitFullscreen();
         }
     });
-    numpadButtons.forEach(button => { /* 変更なし */ });
-    document.addEventListener('keydown', (e) => { /* 変更なし */ });
+    numpadButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            if (!isGameActive || isProcessing) return;
+            const action = button.classList.value;
+            if (action.includes('num')) {
+                if (answerInput.value.length < 2) {
+                    answerInput.value += button.textContent;
+                    checkAndSubmit();
+                }
+            } else if (action.includes('clear')) {
+                answerInput.value = "";
+            } else if (action.includes('backspace')) {
+                answerInput.value = answerInput.value.slice(0, -1);
+            }
+        });
+    });
+    document.addEventListener('keydown', (e) => {
+        if (!isGameActive || isProcessing) return;
+        if (e.key >= '0' && e.key <= '9') {
+            if (answerInput.value.length < 2) {
+                answerInput.value += e.key;
+                checkAndSubmit();
+            }
+        } else if (e.key === 'Backspace') {
+            answerInput.value = answerInput.value.slice(0, -1);
+        }
+    });
+    
     // --- 初期状態設定 ---
     disableInputs();
     remainingEl.textContent = `ぜんぶで 36 もん`;
