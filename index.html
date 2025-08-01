@@ -34,7 +34,7 @@
         display: flex;
     }
 
-    /* CSS Grid でシンプルかつ堅牢なレイアウトに */
+    /* CSS Grid でレイアウトを定義 */
     .container {
         display: grid;
         width: 100%;
@@ -42,13 +42,13 @@
         box-sizing: border-box;
         padding: 10px;
         gap: 10px;
-        grid-template-columns: 1fr; /* 基本は1列（スマホ） */
+        grid-template-columns: 1fr; /* スマホでは1列 */
         grid-template-rows: 1fr;
     }
     
     @media (min-width: 650px) {
         .container {
-            grid-template-columns: 1fr 1fr; /* 横に2列 */
+            grid-template-columns: 1fr 1fr;
         }
     }
 
@@ -65,16 +65,15 @@
         position: relative;
     }
     
-    /* ヘッダー */
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px; /* 少し余白を確保 */
+        margin-bottom: 10px;
     }
     .header-icon {
-        width: clamp(28px, 8vw, 40px);
-        height: clamp(28px, 8vw, 40px);
+        width: clamp(30px, 8vw, 40px);
+        height: clamp(30px, 8vw, 40px);
     }
     #remaining-count {
         font-size: clamp(0.8em, 3vw, 1.1em);
@@ -92,17 +91,22 @@
         text-align: center;
     }
     #question {
-        font-size: clamp(3.5em, 13vw, 5.5em);
+        font-size: clamp(3em, 11vw, 5em);
         line-height: 1.1;
     }
     #question.finish-message {
         font-size: clamp(2em, 7vw, 2.8em);
         color: #007bff;
     }
-    #next-question { display: none; }
+    #next-question {
+        font-size: clamp(1.2em, 4vw, 2.2em);
+        color: #aaa;
+        margin-top: 0.5em;
+        min-height: 1.2em;
+    }
 
     #answer {
-        font: 700 clamp(3.5em, 13vw, 5em) 'M PLUS Rounded 1c', sans-serif;
+        font: 700 clamp(3em, 11vw, 4.5em) 'M PLUS Rounded 1c', sans-serif;
         width: 100%;
         height: 1.5em;
         text-align: center;
@@ -119,27 +123,42 @@
         margin: 0;
     }
     #time { font-size: clamp(1em, 3.8vw, 1.2em); line-height: 1.5; }
-    #history { display: none; }
+    
+    /* ▼▼▼【ご提案通り】履歴はテンキーの下に配置 ▼▼▼ */
+    #history {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 10px 0 0 0;
+        font-size: clamp(0.8em, 3vw, 1em);
+        flex-shrink: 1; /* 親要素が縮むときに履歴エリアも縮む */
+        overflow-y: auto; /* エリアが縮んでもスクロールで履歴を見られる */
+        border-top: 1px solid #eee;
+    }
+    #history li {
+        padding: 4px;
+        border-bottom: 1px solid #eee;
+    }
 
+    /* テンキーのレイアウト */
     .numpad {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
-        margin-top: auto; /* テンキーを下部に固定 */
+        margin-top: auto; /* 左パネルでは回答欄の下、右パネルでは履歴の上に来るように */
     }
     .numpad button {
-        font: 700 clamp(1.8em, 6vw, 2.5em) 'M PLUS Rounded 1c', sans-serif;
+        font: 700 clamp(1.5em, 5vw, 2.2em) 'M PLUS Rounded 1c', sans-serif;
         border-radius: 8px;
         border: 1px solid #ccc;
         background-color: #fff;
         cursor: pointer;
-        aspect-ratio: 1.5 / 1;
+        padding: 10px 0;
+        min-height: 44px;
     }
     
     #start { width: 100%; padding: 12px; font-size: clamp(1.4em, 5vw, 1.8em); }
     #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 20px; }
-
-    /* （共通の細かいスタイル） */
+    
     .correct { color: #28a745; }
     .wrong { color: #dc3545; }
     #start { background-color: #007bff; color: white; border: none; }
@@ -163,12 +182,11 @@
         <button id="start">スタート</button>
         <div id="question-area">
             <p id="question"></p>
-            <!-- 完全に不要になったnext-questionをHTMLからも削除 -->
+            <p id="next-question"></p>
         </div>
         <input id="answer" type="text" readonly>
         <p id="result"></p>
         <p id="time"></p>
-        <ul id="history"></ul>
     </div>
     <div class="right-panel">
         <div class="numpad">
@@ -177,6 +195,8 @@
             <button class="num">1</button><button class="num">2</button><button class="num">3</button>
             <button class="clear">クリア</button><button class="num">0</button><button class="backspace">けす</button>
         </div>
+        <!-- ▼▼▼【ご提案通り】履歴をテンキーの下に移動 ▼▼▼ -->
+        <ul id="history"></ul>
         <div id="congrats-image-wrapper">
             <img id="congrats-image" src="https://github.com/sunflower030/Multiplication/blob/main/iine.png?raw=true" alt="おめでとう！">
         </div>
@@ -189,21 +209,19 @@
         window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
     }
     
-    // ▼▼▼【JavaScript最終FIX】エラーの原因となる古いコードを完全に削除し、クリーンな状態に ▼▼▼
-
-    // --- DOM要素の取得 ---
     const startButton = document.getElementById("start");
     const questionEl = document.getElementById("question");
+    const nextQuestionEl = document.getElementById("next-question");
     const answerInput = document.getElementById("answer");
     const resultEl = document.getElementById("result");
     const timeEl = document.getElementById("time");
+    const historyEl = document.getElementById("history");
     const remainingEl = document.getElementById("remaining-count");
     const numpadButtons = document.querySelectorAll(".numpad button");
     const congratsImageWrapper = document.getElementById("congrats-image-wrapper");
     const congratsImage = document.getElementById("congrats-image");
     const fullscreenButton = document.getElementById("fullscreen-btn");
 
-    // --- ゲームの状態を管理する変数 ---
     const MIN = 2, MAX = 9;
     let allQuestions = [];
     let currentQuestionIndex = 0;
@@ -213,7 +231,6 @@
     let isProcessing = false;
     let retryCount = 0;
 
-    // --- ゲームの初期化 ---
     function initializeGame() {
         let combinations = [];
         for (let i = MIN; i <= MAX; i++) {
@@ -226,6 +243,7 @@
 
         currentQuestionIndex = 0;
         retryCount = 0;
+        historyEl.innerHTML = "";
         resultEl.textContent = "";
         timeEl.innerHTML = "";
         answerInput.value = "";
@@ -240,7 +258,6 @@
         setQuestion();
     }
 
-    // --- 問題の表示・更新 ---
     function setQuestion() {
         if (currentQuestionIndex >= allQuestions.length) {
             finishGame();
@@ -252,6 +269,17 @@
         }
         currentProduct = numA * numB;
         questionEl.textContent = `${numA} × ${numB} = □`;
+        
+        if (currentQuestionIndex + 1 < allQuestions.length) {
+            let nextA = allQuestions[currentQuestionIndex + 1].numA;
+            let nextB = allQuestions[currentQuestionIndex + 1].numB;
+            if (Math.random() < 0.5) {
+                [nextA, nextB] = [nextB, nextA];
+            }
+            nextQuestionEl.textContent = `${nextA} × ${nextB} = □`;
+        } else {
+            nextQuestionEl.textContent = "さいごのもんだい！";
+        }
         remainingEl.textContent = `のこり ${allQuestions.length - currentQuestionIndex} もん`;
         resultEl.textContent = "";
     }
@@ -269,9 +297,13 @@
         const value = parseInt(answerInput.value, 10);
         const isCorrect = (value === currentProduct);
 
+        const li = document.createElement("li");
+        li.textContent = `${questionEl.textContent.replace('□', value)}`;
+
         if (isCorrect) {
             resultEl.textContent = "正解！";
             resultEl.className = "correct";
+            li.className = "correct";
             currentQuestionIndex++;
             setTimeout(() => {
                 answerInput.value = "";
@@ -281,12 +313,14 @@
         } else {
             resultEl.textContent = "ちがうよ、もういちど！";
             resultEl.className = "wrong";
+            li.className = "wrong";
             retryCount++;
             setTimeout(() => {
                 answerInput.value = "";
                 isProcessing = false;
             }, 400);
         }
+        historyEl.prepend(li);
     }
 
     function finishGame() {
@@ -297,6 +331,7 @@
         timeEl.innerHTML = `クリア！かかった時間：${minutes}分${seconds}秒<br>再チャレンジした回数：${retryCount}回`;
         questionEl.textContent = "よくがんばりました！";
         questionEl.classList.add('finish-message');
+        nextQuestionEl.textContent = "";
         remainingEl.textContent = "おつかれさま！";
         resultEl.textContent = "";
         if (congratsImage.src && congratsImage.src.includes('http')) {
@@ -311,7 +346,6 @@
     function enableInputs() { numpadButtons.forEach(btn => btn.disabled = false); }
     function disableInputs() { numpadButtons.forEach(btn => btn.disabled = true); }
 
-    // --- イベントリスナー ---
     startButton.addEventListener("click", initializeGame);
     fullscreenButton.addEventListener("click", () => {
         if (!document.fullscreenElement) {
@@ -348,7 +382,6 @@
         }
     });
     
-    // --- 初期状態設定 ---
     disableInputs();
     remainingEl.textContent = `ぜんぶで 36 もん`;
 </script>
